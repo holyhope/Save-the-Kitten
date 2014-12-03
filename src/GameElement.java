@@ -5,5 +5,8 @@ public interface GameElement {
 		return true;
 	}
 
+	
+	
+	
 	public void draw(JWindow window);
 }
