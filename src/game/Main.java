@@ -1,8 +1,4 @@
-
-import game.Goal;
-import game.Launcher;
-import game.Round;
-
+package game;
 import java.awt.Point;
 
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -14,9 +10,10 @@ import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 
 public class Main {
+
 	public static void main(String[] args) {
-		Launcher launcher = new Launcher(0, 5, 5);
-		Round round = Round.construct(10, 10, launcher);
+		Launcher launcher = new Launcher(0, 50, 5);
+		Round round = Round.construct(500, 500, launcher);
 		round.add(new Goal(), new Point(2, 2));
 		round.start();
 	}

@@ -1,6 +1,11 @@
+package test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import game.GameElement;
+import game.Goal;
+import game.Launcher;
+import game.Round;
 
 import java.awt.Point;
 

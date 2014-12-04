@@ -1,8 +1,9 @@
+package game;
+
 import java.awt.Dimension;
 import java.awt.Point;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map.Entry;
 import java.util.Objects;
 
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -51,14 +52,18 @@ public class Round {
 	}
 
 	private void createWalls() {
-		final int wallSize = 10;
+		final int wallSize = 1;
 
+		// Bottom Wall
 		createWall(dimension.width / 2, -wallSize, dimension.width / 2
 				+ wallSize, wallSize);
+		// Top wall
 		createWall(dimension.width / 2, dimension.height + wallSize,
 				dimension.width / 2 + wallSize, wallSize);
+		// Left wall
 		createWall(-wallSize, dimension.height / 2, wallSize,
 				dimension.height / 2);
+		// Right wall
 		createWall(dimension.width + wallSize, dimension.height / 2, wallSize,
 				dimension.height / 2);
 	}
@@ -141,19 +146,9 @@ public class Round {
 
 	private void startLaunch() {
 		Runnable r = () -> {
-			Cat cat;
-			final HashMap<Cat, BodyDef> bodies = launcher.createBodies();
-			final long waitTime = launcher.getWaitTime();
-			for (Entry<Cat, BodyDef> entry : bodies.entrySet()) {
-				cat = entry.getKey();
-				cats.add(cat);
-				elements.put(cat, world.createBody(entry.getValue()));
-				try {
-					Thread.sleep(waitTime);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
+			final HashMap<Cat, Body> bodies = launcher.createBodies(world);
+			cats.addAll(bodies.keySet());
+			elements.putAll(bodies);
 		};
 		r.run();
 	}

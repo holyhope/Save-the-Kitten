@@ -1,10 +1,11 @@
+package game;
 import java.awt.Point;
 import java.util.HashMap;
 import java.util.Objects;
 
 import org.jbox2d.common.Vec2;
-import org.jbox2d.dynamics.BodyDef;
-import org.jbox2d.dynamics.BodyType;
+import org.jbox2d.dynamics.Body;
+import org.jbox2d.dynamics.World;
 
 public class Launcher {
 	private final Point position;
@@ -15,7 +16,7 @@ public class Launcher {
 	public Launcher(int x, int y, int nbCat, Vec2 orientation) {
 		if (nbCat <= 0) {
 			throw new IllegalArgumentException(
-					"Le nombre de chat doit être positif.");
+					"Le nombre de chat doit etre positif.");
 		}
 		position = new Point(x, y);
 		this.orientation = Objects.requireNonNull(orientation);
@@ -26,19 +27,13 @@ public class Launcher {
 		this(x,y,1,new Vec2(strengh,0));
 	}
 
-	public HashMap<Cat, BodyDef> createBodies() {
-		BodyDef bodyDef;
-		HashMap<Cat,BodyDef> list = new HashMap<>();
+	public HashMap<Cat, Body> createBodies(World world) {
+		HashMap<Cat,Body> map = new HashMap<>();
 		for (int i = 0; i < nbCat; i++) {
-			bodyDef = new BodyDef();
-			bodyDef.type = BodyType.DYNAMIC;
-			bodyDef.position.set(position.x, position.y);
-			//bodyDef.angle = (float) (Math.PI / 6);
-			bodyDef.fixedRotation = false;
-			bodyDef.linearVelocity = orientation;
-			list.put( new Cat(), bodyDef );
+			Cat cat = new Cat();
+			map.put( cat, cat.addToWorld(world, position, orientation) );
 		}
-		return list;
+		return map;
 	}
 
 	public long getWaitTime() {

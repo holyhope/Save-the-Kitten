@@ -1,3 +1,4 @@
+package game;
 import javax.swing.JWindow;
 
 public class Goal implements GameElement {

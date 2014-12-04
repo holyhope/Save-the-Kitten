@@ -1,4 +1,6 @@
-import static org.junit.Assert.*;
+package test;
+import static org.junit.Assert.fail;
+import game.Launcher;
 
 import org.junit.Test;
 
