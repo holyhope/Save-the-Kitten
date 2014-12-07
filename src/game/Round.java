@@ -3,31 +3,30 @@ package game;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.Map.Entry;
 import java.util.Objects;
 
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
-import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.World;
 
 public class Round {
-	private final HashMap<GameElement, Body> elements = new HashMap<>();
-	private final LinkedList<Goal> goals = new LinkedList<>();
-	private final LinkedList<Cat> cats = new LinkedList<>();
+	private final HashMap<Goal, Body> goals = new HashMap<>();
+	private final HashMap<Bullet, Body> bullets = new HashMap<>();
 	private final Dimension dimension;
-	private final World world = new World(new Vec2(0, 0));
+	private final World world;
 	private final Launcher launcher;
 
-	private Round(int width, int height, Launcher launcher) {
-		if (width <= 0 || height <= 0) {
+	private Round(Dimension dimension, World world, Launcher launcher) {
+		this.world = Objects.requireNonNull(world);
+		Objects.requireNonNull(dimension);
+		if (dimension.width <= 0 || dimension.height <= 0) {
 			throw new IllegalArgumentException(
-					"Board dimension must be positive.");
+					"Dimension of the board must be positive.");
 		}
-		dimension = new Dimension(width, height);
-
+		this.dimension = new Dimension(dimension.width, dimension.height);
 		Objects.requireNonNull(launcher);
 		if (!isInBoard(launcher.getPosition())) {
 			throw new IllegalArgumentException("Launcher must be in board.");
@@ -35,14 +34,14 @@ public class Round {
 		this.launcher = launcher;
 	}
 
-	public static Round construct(int width, int height, Launcher launcher) {
-		Round round = new Round(width, height, launcher);
+	public static Round create(Dimension dimension, World world,
+			Launcher launcher) {
+		Round round = new Round(dimension, world, launcher);
 		round.createWalls();
 		return round;
 	}
 
 	private void createWall(int x, int y, int width, int height) {
-		// TODO Check why wall does not work in world.step()
 		BodyDef wallDef = new BodyDef();
 		wallDef.position.set(x, y);
 		Body wallBody = world.createBody(wallDef);
@@ -73,34 +72,10 @@ public class Round {
 				&& position.y >= 0 && position.y < dimension.height;
 	}
 
-	private void addElement(GameElement element, Point position) {
-		Objects.requireNonNull(element);
-		if (!isInBoard(position)) {
-			throw new IllegalArgumentException("Coordinates of " + element
-					+ " is not valid.");
-		}
-		BodyDef body = new BodyDef();
-		body.position.set(position.x, position.y);
-		body.type = BodyType.STATIC;
-		elements.put(element, world.createBody(body));
-	}
-
-	public void add(GameElement element, Point position) {
-		addElement(element, position);
-	}
-
-	public void add(Goal element, Point position) {
-		addElement(element, position);
-		goals.add(element);
-	}
-
 	private boolean isVictory() {
-		for (Goal goal : goals) {
-			for (Cat cat : cats) {
-				if (!elements.get(goal).getPosition()
-						.equals(elements.get(cat).getPosition())) {
-					return false;
-				}
+		for (Entry<Goal, Body> entryGoal : goals.entrySet()) {
+			if (!entryGoal.getKey().isFull()) {
+				return false;
 			}
 		}
 		return true;
@@ -108,9 +83,13 @@ public class Round {
 
 	private boolean isDefeat() {
 		Vec2 vecNull = new Vec2(0, 0);
-		for (Cat cat : cats) {
-			if (cat.isLaunched()
-					&& elements.get(cat).getLinearVelocity().equals(vecNull)) {
+		if (!launcher.isFinished()) {
+			return false;
+		}
+		for (Entry<Bullet, Body> entryBullet : bullets.entrySet()) {
+			if (entryBullet.getKey().isLaunched()
+					&& !entryBullet.getKey().isCatched()
+					&& entryBullet.getValue().getLinearVelocity().equals(vecNull)) {
 				return true;
 			}
 		}
@@ -121,36 +100,55 @@ public class Round {
 		return isVictory() || isDefeat();
 	}
 
+	private void updateLists() {
+		Body body = world.getBodyList();
+		Object userData;
+		while (body != null) {
+			userData = body.getUserData();
+			if (userData instanceof Bullet) {
+				Bullet bullet = (Bullet) userData;
+				bullets.put(bullet, bullet.getBody());
+			} else if (userData instanceof Goal) {
+				Goal goal = (Goal) userData;
+				goals.put(goal, goal.getBody());
+			}
+			body = body.getNext();
+		}
+	}
+
 	private void update() {
 		float timeStep = 1.0f / 60.0f;
 		int velocityIterations = 6;
 		int positionIterations = 2;
 
-		world.step(timeStep, velocityIterations, positionIterations);
-		for (Cat cat : cats) {
-			Body body = elements.get(cat);
-			Vec2 position = body.getPosition();
-			float angle = body.getAngle();
-			System.out.printf(cat + " %4.2f %4.2f %4.2f\n", position.x,
-					position.y, angle);
+		System.out.println("Update !");
+		synchronized (world) {
+			world.step(timeStep, velocityIterations, positionIterations);
 		}
+		updateLists();
+		for (Entry<Bullet, Body> entryBullet : bullets.entrySet()) {
+			System.out.println("Bullet: " + entryBullet.getKey().toString() + " "
+					+ entryBullet.getValue().getPosition());
+		}
+		for (Entry<Goal, Body> entryGoal : goals.entrySet()) {
+			System.out.println("Goal: " + entryGoal.getKey().toString() + " "
+					+ entryGoal.getValue().getPosition());
+		}
+		System.out.println("Fin");
 	}
 
 	public void start() {
 		startLaunch();
 
-		while (!isFinnished()) {
+		do {
 			update();
-		}
+		} while (!isFinnished());
 	}
 
 	private void startLaunch() {
-		Runnable r = () -> {
-			final HashMap<Cat, Body> bodies = launcher.createBodies(world);
-			cats.addAll(bodies.keySet());
-			elements.putAll(bodies);
-		};
-		r.run();
+		new Thread(() -> {
+			launcher.launch(world);
+		}).start();
 	}
 
 }

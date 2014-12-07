@@ -1,44 +1,58 @@
 package test;
-import static org.junit.Assert.fail;
+
+import static org.junit.Assert.*;
 import game.Launcher;
 
+import java.awt.Point;
+
+import org.jbox2d.common.Vec2;
+import org.jbox2d.dynamics.World;
 import org.junit.Test;
 
 public class LauncherTest {
-
-	@Test(expected = IllegalArgumentException.class)
-	public void testLauncherNbCatNull() {
-		new Launcher(0, 0, 0);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void testLauncherPosXNegative() {
-		new Launcher(-5, 0, 0);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void testLauncherPosYNegative() {
-		new Launcher(0, -5, 0);
+	@Test(expected = NullPointerException.class)
+	public void testLauncherPositionNull() {
+		new Launcher(null, 4);
 	}
 
 	@Test
 	public void testLauncher() {
-		new Launcher(500, 25, 4);
+		new Launcher(new Point(50, 25), 4);
 	}
 
 	@Test
-	public void testCreateBody() {
-		new Launcher(50, 50, 2);
+	public void testGetPosition() {
+		Launcher launcher;
+		launcher = new Launcher(new Point(5, 7), 0);
+		assertEquals(new Point(5, 7), launcher.getPosition());
+		launcher = new Launcher(new Point(0, -10), 0);
+		assertEquals(new Point(0, -10), launcher.getPosition());
 	}
 
 	@Test
-	public void testGetWaitTime() {
-		fail("Not yet implemented");
+	public void testLaunch() {
+		Launcher launcher;
+		World world = new World(new Vec2(0,0));
+
+		launcher = new Launcher(new Point(5, 7), 3, new Vec2(1,0));
+		launcher.launch(world);
+		assertEquals(3, world.getBodyCount());
+
+		launcher = new Launcher(new Point(5, 7), 0);
+		launcher.launch(world);
+		assertEquals(4, world.getBodyCount());
+
+		world = new World(new Vec2(0,0));
+		launcher.launch(world);
+		assertEquals(1, world.getBodyCount());
 	}
 
 	@Test
-	public void testGetNbCat() {
-		fail("Not yet implemented");
+	public void testIsFinished() {
+		Launcher launcher = new Launcher(new Point(5, 7), 0);
+		World world = new World(new Vec2(0,0));
+		assertFalse(launcher.isFinished());
+		launcher.launch(world);
+		assertTrue(launcher.isFinished());
 	}
-
 }

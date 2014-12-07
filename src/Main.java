@@ -1,8 +1,8 @@
-
 import game.Goal;
 import game.Launcher;
 import game.Round;
 
+import java.awt.Dimension;
 import java.awt.Point;
 
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -15,9 +15,10 @@ import org.jbox2d.dynamics.World;
 
 public class Main {
 	public static void main(String[] args) {
-		Launcher launcher = new Launcher(0, 5, 5);
-		Round round = Round.construct(10, 10, launcher);
-		round.add(new Goal(), new Point(2, 2));
+		Launcher launcher = new Launcher(new Point(0, 5), 0.1f);
+		World world = new World(new Vec2(0, 0));
+		Round round = Round.create(new Dimension(30, 30), world, launcher);
+		Goal.create(world, new Point(2, 2));
 		round.start();
 	}
 

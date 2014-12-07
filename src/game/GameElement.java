@@ -1,10 +1,20 @@
 package game;
+import java.util.Objects;
+
 import javax.swing.JWindow;
 
-public interface GameElement {
-	public default boolean isVictory() {
-		return true;
+import org.jbox2d.dynamics.Body;
+
+public abstract class GameElement {
+	private final Body body;
+
+	public GameElement(Body body) {
+		this.body = Objects.requireNonNull(body);
 	}
 
-	public void draw(JWindow window);
+	public Body getBody() {
+		return body;
+	}
+
+	public abstract void draw(JWindow window);
 }
