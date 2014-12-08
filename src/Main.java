@@ -15,11 +15,18 @@ import org.jbox2d.dynamics.World;
 
 public class Main {
 	public static void main(String[] args) {
-		Launcher launcher = new Launcher(new Point(0, 5), 0.1f);
+		Launcher launcher = new Launcher(new Point(5, 5), 3, new Vec2(0.1f,0));
 		World world = new World(new Vec2(0, 0));
 		Round round = Round.create(new Dimension(30, 30), world, launcher);
-		Goal.create(world, new Point(2, 2));
+		round.add(Goal.create(world, new Point(2, 2)));
+		round.add(Goal.create(world, new Point(3, 2)));
+		round.add(Goal.create(world, new Point(2, 3)));
 		round.start();
+		if ( round.isVictory() ) {
+			System.out.println("Victory !");
+		} else if ( round.isDefeat() ) {
+			System.out.println("Defeat !");
+		}
 	}
 
 	public static void jBox2DExample(String[] args) {

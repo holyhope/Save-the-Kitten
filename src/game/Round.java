@@ -2,22 +2,25 @@ package game;
 
 import java.awt.Dimension;
 import java.awt.Point;
-import java.util.HashMap;
-import java.util.Map.Entry;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 
 import org.jbox2d.collision.shapes.PolygonShape;
-import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
+import org.jbox2d.dynamics.Filter;
+import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.World;
 
 public class Round {
-	private final HashMap<Goal, Body> goals = new HashMap<>();
-	private final HashMap<Bullet, Body> bullets = new HashMap<>();
+	private final LinkedHashSet<Goal> goals = new LinkedHashSet<>();
+	private final LinkedHashSet<Bullet> bullets = new LinkedHashSet<>();
 	private final Dimension dimension;
 	private final World world;
 	private final Launcher launcher;
+	private final float timeStep = 1.0f / 60.0f;
+	private final int velocityIterations = 6;
+	private final int positionIterations = 2;
 
 	private Round(Dimension dimension, World world, Launcher launcher) {
 		this.world = Objects.requireNonNull(world);
@@ -37,6 +40,7 @@ public class Round {
 	public static Round create(Dimension dimension, World world,
 			Launcher launcher) {
 		Round round = new Round(dimension, world, launcher);
+		world.setContactListener(new Collide());
 		round.createWalls();
 		return round;
 	}
@@ -47,7 +51,11 @@ public class Round {
 		Body wallBody = world.createBody(wallDef);
 		PolygonShape wallBox = new PolygonShape();
 		wallBox.setAsBox(width, height);
-		wallBody.createFixture(wallBox, 0);
+		Fixture fixture = wallBody.createFixture(wallBox, 0);
+		Filter filter = new Filter();
+		filter.categoryBits = 0x0001;
+		filter.maskBits = 0xFFFF;
+		fixture.setFilterData(filter);
 	}
 
 	private void createWalls() {
@@ -72,69 +80,37 @@ public class Round {
 				&& position.y >= 0 && position.y < dimension.height;
 	}
 
-	private boolean isVictory() {
-		for (Entry<Goal, Body> entryGoal : goals.entrySet()) {
-			if (!entryGoal.getKey().isFull()) {
+	public boolean isVictory() {
+		for (Goal goal : goals) {
+			if (!goal.isFull()) {
 				return false;
 			}
 		}
 		return true;
 	}
 
-	private boolean isDefeat() {
-		Vec2 vecNull = new Vec2(0, 0);
-		if (!launcher.isFinished()) {
-			return false;
-		}
-		for (Entry<Bullet, Body> entryBullet : bullets.entrySet()) {
-			if (entryBullet.getKey().isLaunched()
-					&& !entryBullet.getKey().isCatched()
-					&& entryBullet.getValue().getLinearVelocity().equals(vecNull)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private boolean isFinnished() {
-		return isVictory() || isDefeat();
-	}
-
-	private void updateLists() {
-		Body body = world.getBodyList();
-		Object userData;
-		while (body != null) {
-			userData = body.getUserData();
-			if (userData instanceof Bullet) {
-				Bullet bullet = (Bullet) userData;
-				bullets.put(bullet, bullet.getBody());
-			} else if (userData instanceof Goal) {
-				Goal goal = (Goal) userData;
-				goals.put(goal, goal.getBody());
-			}
-			body = body.getNext();
-		}
+	public boolean isDefeat() {
+		return bullets.stream().map(bullet -> bullet.isStopped())
+				.reduce(false, (a, b) -> a || b);
 	}
 
 	private void update() {
-		float timeStep = 1.0f / 60.0f;
-		int velocityIterations = 6;
-		int positionIterations = 2;
-
-		System.out.println("Update !");
-		synchronized (world) {
+		try {
 			world.step(timeStep, velocityIterations, positionIterations);
+		} catch (ArrayIndexOutOfBoundsException e) {
 		}
-		updateLists();
-		for (Entry<Bullet, Body> entryBullet : bullets.entrySet()) {
-			System.out.println("Bullet: " + entryBullet.getKey().toString() + " "
-					+ entryBullet.getValue().getPosition());
+
+		for (Bullet bullet : bullets) {
+			System.out.println("Bullet: " + bullet + " "
+					+ bullet.getBody().getPosition() + " "
+					+ (bullet.isStopped() ? "stopped" : "running") + " "
+					+ bullet.getBody().isActive());
 		}
-		for (Entry<Goal, Body> entryGoal : goals.entrySet()) {
-			System.out.println("Goal: " + entryGoal.getKey().toString() + " "
-					+ entryGoal.getValue().getPosition());
+		for (Goal goal : goals) {
+			System.out.println("Goal: " + goal + " "
+					+ goal.getBody().getPosition());
 		}
-		System.out.println("Fin");
+		System.out.println();
 	}
 
 	public void start() {
@@ -142,13 +118,15 @@ public class Round {
 
 		do {
 			update();
-		} while (!isFinnished());
+		} while (!isVictory() && !isDefeat());
 	}
 
 	private void startLaunch() {
-		new Thread(() -> {
-			launcher.launch(world);
-		}).start();
+		bullets.addAll(launcher.launch(world));
+	}
+
+	public void add(Goal goal) {
+		goals.add(Objects.requireNonNull(goal));
 	}
 
 }

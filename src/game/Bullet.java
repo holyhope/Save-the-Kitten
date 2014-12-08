@@ -1,66 +1,63 @@
 package game;
 
 import java.awt.Point;
-
-import javax.swing.JWindow;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
+import org.jbox2d.dynamics.Filter;
+import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.FixtureDef;
-import org.jbox2d.dynamics.World;
 
-public class Bullet extends GameElement {
-	private final String name;
-	private final FixtureDef fixtureDef;
-	private boolean catched = false;
+public abstract class Bullet extends GameElement {
 	/**
 	 * Let name cat with integer if not specified
 	 */
-	private static int nbCat = 0;
+	private static AtomicInteger nbCat = new AtomicInteger();
+	private final String name = "Unamed cat (" + nbCat.getAndIncrement() + ")";
+	private boolean stopped = false;
+	private final FixtureDef fixtureDef;
+	private Fixture fixture;
+	private static final Filter filter;
 
-	public static Bullet create(World world, Point position, Vec2 velocity) {
-		return create("Unamed cat (" + nbCat + ")", world, position, velocity);
+	static {
+		filter = new Filter();
+		filter.categoryBits = 0x0002;
+		filter.maskBits = 0xFFFF - filter.categoryBits;
 	}
 
-	public static Bullet create(String name, World world, Point position,
-			Vec2 velocity) {
+	protected Bullet(Body body, FixtureDef fixtureDef) {
+		super(body);
+		this.fixtureDef = fixtureDef;
+	}
+
+	protected static BodyDef getBodyDef(Point position, Vec2 velocity,
+			float angularVelocity) {
 		BodyDef bodyDef = new BodyDef();
 		bodyDef.type = BodyType.DYNAMIC;
+		bodyDef.bullet = true;
+		bodyDef.active = false;
+		Objects.requireNonNull(position);
 		bodyDef.position.set(position.x, position.y);
-		bodyDef.linearVelocity = velocity;
-		Body body = world.createBody(bodyDef);
-		while (body == null) {
-			synchronized(world) {
-				body = world.createBody(bodyDef);
-			}
-		}
-		Bullet bullet = new Bullet(name, body);
-		body.setUserData(bullet);
-		return bullet;
+		Objects.requireNonNull(velocity);
+		bodyDef.linearVelocity = new Vec2(velocity.x, velocity.y);
+		Objects.requireNonNull(angularVelocity);
+		bodyDef.angularVelocity = angularVelocity;
+		return bodyDef;
 	}
 
-	private Bullet(String name, Body body) {
-		super(body);
+	protected static FixtureDef getFixtureDef() {
+		final FixtureDef fixtureDef = new FixtureDef();
 		PolygonShape dynamicBox = new PolygonShape();
 		dynamicBox.setAsBox(1, 1);
-		fixtureDef = new FixtureDef();
 		fixtureDef.shape = dynamicBox;
 		fixtureDef.density = 1;
 		fixtureDef.friction = 0.3f;
-		body.createFixture(fixtureDef);
-		this.name = name;
-	}
-
-	@Override
-	public void draw(JWindow window) {
-		// TODO Auto-generated method stub
-	}
-
-	public boolean isLaunched() {
-		return false;
+		return fixtureDef;
 	}
 
 	@Override
@@ -68,15 +65,32 @@ public class Bullet extends GameElement {
 		return name;
 	}
 
-	public boolean isCatched() {
-		return catched;
+	public void beginContact(Body body) {
+		Object object = body.getUserData();
+		if (object instanceof Goal) {
+			((Goal) object).receive(this);
+		}
 	}
 
-	public boolean score(Goal goal) {
-		if (catched) {
-			return false;
-		}
-		catched = goal.receive(this);
-		return catched;
+	public void start() {
+		System.out.println(this + " is starting...");
+		do {
+			fixture = getBody().createFixture(fixtureDef);
+		} while (fixture == null);
+		fixture.setFilterData(filter);
+		stopped = false;
+		getBody().setActive(true);
 	}
+
+	public void stop() {
+		getBody().setActive(false);
+		getBody().destroyFixture(fixture);
+		stopped = true;
+	}
+
+	public boolean isStopped() {
+		return stopped;
+	}
+
+	public abstract void endContact(Body body);
 }

@@ -46,13 +46,4 @@ public class LauncherTest {
 		launcher.launch(world);
 		assertEquals(1, world.getBodyCount());
 	}
-
-	@Test
-	public void testIsFinished() {
-		Launcher launcher = new Launcher(new Point(5, 7), 0);
-		World world = new World(new Vec2(0,0));
-		assertFalse(launcher.isFinished());
-		launcher.launch(world);
-		assertTrue(launcher.isFinished());
-	}
 }

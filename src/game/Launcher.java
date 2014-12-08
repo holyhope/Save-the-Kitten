@@ -1,17 +1,19 @@
 package game;
 
 import java.awt.Point;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Random;
+import java.util.Set;
 
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.World;
 
 public class Launcher {
 	private final Point position;
-	private final long waitTime = 500;
+	private final long waitTime = 1500;
 	private final Vec2 orientation;
 	private final int nbCat;
-	private boolean ended = false;
 
 	public Launcher(Point position, int nbCat, Vec2 orientation) {
 		if (nbCat <= 0) {
@@ -20,7 +22,8 @@ public class Launcher {
 		}
 		Objects.requireNonNull(position);
 		this.position = new Point(position.x, position.y);
-		this.orientation = Objects.requireNonNull(orientation);
+		Objects.requireNonNull(orientation);
+		this.orientation = new Vec2(orientation.x, orientation.y);
 		this.nbCat = nbCat;
 	}
 
@@ -32,19 +35,30 @@ public class Launcher {
 		return new Point(position.x, position.y);
 	}
 
-	public boolean isFinished() {
-		return ended;
+	public Vec2 getOrientation() {
+		return new Vec2(orientation.x, orientation.y);
 	}
 
-	public void launch(World world) {
+	public Set<Bullet> launch(World world) {
+		final LinkedHashSet<Bullet> set = new LinkedHashSet<>();
+		Random random = new Random();
 		for (int i = 0; i < nbCat; i++) {
-			Bullet.create(world, position, orientation);
-			try {
-				Thread.sleep(waitTime);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			set.add(Cat.create(world, getPosition(), getOrientation(), random.nextFloat()));
 		}
-		ended = true;
+
+		final LinkedHashSet<Bullet> setFinal = new LinkedHashSet<>();
+		setFinal.addAll(set);
+		new Thread(() -> {
+			for (Bullet bullet : setFinal) {
+				bullet.start();
+				try {
+					Thread.sleep(waitTime);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+
+		return set;
 	}
 }

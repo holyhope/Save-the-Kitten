@@ -10,6 +10,7 @@ public abstract class GameElement {
 
 	public GameElement(Body body) {
 		this.body = Objects.requireNonNull(body);
+		body.setUserData(this);
 	}
 
 	public Body getBody() {

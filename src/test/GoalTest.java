@@ -1,7 +1,8 @@
 package test;
 
-import static org.junit.Assert.*;
-import game.Bullet;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import game.Cat;
 import game.Goal;
 
 import java.awt.Point;
@@ -30,7 +31,7 @@ public class GoalTest {
 	public void testReceive() {
 		World world = new World(new Vec2(0, 0));
 		Goal goal = Goal.create(world, new Point(2, 2));
-		Bullet bullet = Bullet.create(world, new Point(2, 2), new Vec2(0, 0));
+		Cat bullet = Cat.create(world, new Point(2, 2), new Vec2(0, 0));
 		assertTrue(goal.receive(bullet));
 		assertFalse(goal.receive(bullet));
 	}
@@ -45,14 +46,14 @@ public class GoalTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testReceiveParallelWorld() {
 		Goal goal = Goal.create(new World(new Vec2(0, 0)), new Point(2, 2));
-		goal.receive(Bullet.create(new World(new Vec2(0, 0)), new Point(2, 2),
+		goal.receive(Cat.create(new World(new Vec2(0, 0)), new Point(2, 2),
 				new Vec2(0, 0)));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testReceiveInvalidCat() {
 		Goal goal = Goal.create(new World(new Vec2(0, 0)), new Point(2, 2));
-		goal.receive(Bullet.create(new World(new Vec2(0, 0)), new Point(2, 2),
+		goal.receive(Cat.create(new World(new Vec2(0, 0)), new Point(2, 2),
 				new Vec2(0, 0)));
 	}
 
@@ -61,7 +62,7 @@ public class GoalTest {
 		World world = new World(new Vec2(0, 0));
 		Goal goal = Goal.create(world, new Point(2, 2));
 		assertFalse(goal.isFull());
-		goal.receive(Bullet.create(world, new Point(2, 2), new Vec2(0, 0)));
+		goal.receive(Cat.create(world, new Point(2, 2), new Vec2(0, 0)));
 		assertTrue(goal.isFull());
 	}
 
