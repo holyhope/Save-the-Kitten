@@ -73,7 +73,6 @@ public abstract class Bullet extends GameElement {
 	}
 
 	public void start() {
-		System.out.println(this + " is starting...");
 		do {
 			fixture = getBody().createFixture(fixtureDef);
 		} while (fixture == null);

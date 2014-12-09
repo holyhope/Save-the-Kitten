@@ -15,9 +15,9 @@ import org.jbox2d.dynamics.World;
 
 public class Main {
 	public static void main(String[] args) {
-		Launcher launcher = new Launcher(new Point(5, 5), 3, new Vec2(0.1f,0));
 		World world = new World(new Vec2(0, 0));
-		Round round = Round.create(new Dimension(30, 30), world, launcher);
+		Launcher launcher = Launcher.create(world, new Point(5, 5), 3, new Vec2(0.1f,0));
+		Round round = Round.create(new Dimension(30, 30), launcher);
 		round.add(Goal.create(world, new Point(2, 2)));
 		round.add(Goal.create(world, new Point(3, 2)));
 		round.add(Goal.create(world, new Point(2, 3)));
