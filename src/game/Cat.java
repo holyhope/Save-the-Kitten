@@ -1,5 +1,6 @@
 package game;
 
+import java.awt.Graphics;
 import java.awt.Point;
 
 import javax.swing.JWindow;
@@ -29,9 +30,9 @@ public final class Cat extends Bullet {
 		super(body, getFixtureDef());
 	}
 
-	@Override
-	public void draw(JWindow window) {
-		// TODO Auto-generated method stub
+	
+	public void paint(Graphics g) {
+		g.fillRect(Math.round(getBody().getPosition().x), Math.round(getBody().getPosition().y), 10, 10);
 	}
 
 	@Override
@@ -42,5 +43,10 @@ public final class Cat extends Bullet {
 
 	@Override
 	public void endContact(Body body) {
+	}
+
+	@Override
+	public void draw(JWindow window) {
+		
 	}
 }
