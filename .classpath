@@ -8,5 +8,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/Projet/jbox2d-library-2.2.1.1-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="zen3.jar" sourcepath="zen3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -3,12 +3,8 @@ import game.Goal;
 import game.Launcher;
 import game.Round;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
-import java.awt.RadialGradientPaint;
-import java.awt.geom.Ellipse2D;
-import java.util.Random;
 
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
