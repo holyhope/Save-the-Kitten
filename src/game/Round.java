@@ -1,6 +1,5 @@
 package game;
 
-import java.awt.Dimension;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -20,7 +19,8 @@ public class Round {
 	private final LinkedHashSet<Goal> goals = new LinkedHashSet<>();
 	private final LinkedHashSet<Bullet> bullets = new LinkedHashSet<>();
 	private final LinkedHashSet<Launcher> launchers = new LinkedHashSet<>();
-	private final Dimension dimension;
+	private final float width;
+	private final float height;
 	private final World world;
 	private final float timeStep = 1.0f / 60.0f;
 	private final int velocityIterations = 6;
@@ -29,14 +29,15 @@ public class Round {
 	private final AtomicBoolean started = new AtomicBoolean();
 	private static final Set<World> worldsAttached = Collections
 			.synchronizedSet(new HashSet<>());
+	private final float wallSize = 0.9f;
 
-	private Round(World world, Dimension dimension) {
-		Objects.requireNonNull(dimension);
-		if (dimension.width <= 0 || dimension.height <= 0) {
+	private Round(World world, float width, float height) {
+		if (width <= 0 || height <= 0) {
 			throw new IllegalArgumentException(
 					"Dimension of the board must be positive.");
 		}
-		this.dimension = new Dimension(dimension.width, dimension.height);
+		this.width = width;
+		this.height = height;
 		this.world = Objects.requireNonNull(world);
 		if (!worldsAttached.add(world)) {
 			throw new IllegalStateException(
@@ -44,8 +45,8 @@ public class Round {
 		}
 	}
 
-	public static Round create(World world, Dimension dimension) {
-		Round round = new Round(world, dimension);
+	public static Round create(World world, float width, float height) {
+		Round round = new Round(world, width, height);
 		world.setContactListener(new Collide());
 		round.createWalls();
 		return round;
@@ -57,7 +58,7 @@ public class Round {
 		worldsAttached.remove(world);
 	}
 
-	private void createWall(int x, int y, int width, int height) {
+	private void createWall(float x, float y, float width, float height) {
 		BodyDef wallDef = new BodyDef();
 		wallDef.position.set(x, y);
 		Body wallBody = world.createBody(wallDef);
@@ -71,25 +72,31 @@ public class Round {
 	}
 
 	private void createWalls() {
-		final int wallSize = 1;
-
 		// Bottom Wall
-		createWall(dimension.width / 2, -wallSize, dimension.width / 2
-				+ wallSize, wallSize);
+		createWall(width / 2, -wallSize, width / 2 + wallSize, wallSize);
 		// Top wall
-		createWall(dimension.width / 2, dimension.height + wallSize,
-				dimension.width / 2 + wallSize, wallSize);
+		createWall(width / 2, height + wallSize, width / 2 + wallSize, wallSize);
 		// Left wall
-		createWall(-wallSize, dimension.height / 2, wallSize,
-				dimension.height / 2);
+		createWall(-wallSize, height / 2, wallSize, height / 2);
 		// Right wall
-		createWall(dimension.width + wallSize, dimension.height / 2, wallSize,
-				dimension.height / 2);
+		createWall(width + wallSize, height / 2, wallSize, height / 2);
+	}
+
+	public Set<Launcher> getLaunchers() {
+		return launchers;
+	}
+
+	public Set<Bullet> getBullets() {
+		return bullets;
+	}
+
+	public Set<Goal> getGoals() {
+		return goals;
 	}
 
 	public boolean isInBoard(Vec2 position) {
-		return position.x >= 0 && position.x < dimension.width
-				&& position.y >= 0 && position.y < dimension.height;
+		return position.x >= 0 && position.x < width && position.y >= 0
+				&& position.y < height;
 	}
 
 	public boolean isVictory() {
@@ -107,7 +114,11 @@ public class Round {
 	}
 
 	private void update() {
-		world.step(timeStep, velocityIterations, positionIterations);
+		try {
+			world.step(timeStep, velocityIterations, positionIterations);
+		} catch (Exception e) {
+			// TODO
+		}
 		/*
 		 * for (Bullet bullet : bullets) { System.out.println("Bullet: " +
 		 * bullet + " " + bullet.getPosition() + " " + (bullet.isStopped() ?
@@ -176,5 +187,13 @@ public class Round {
 
 	public Object getEndLock() {
 		return endLock;
+	}
+
+	public float getWidth() {
+		return width;
+	}
+
+	public float getHeight() {
+		return height;
 	}
 }

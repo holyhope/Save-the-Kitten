@@ -35,8 +35,7 @@ public abstract class GameElement {
 	}
 
 	public void setLinearVelocity(Vec2 vec2) {
-		// TODO Auto-generated method stub
-		
+		body.setLinearVelocity(vec2);
 	}
 
 	public abstract void draw(Graphics2D g);

@@ -1,6 +1,11 @@
 package game;
 
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Polygon;
+import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.PathIterator;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Random;
@@ -60,8 +65,7 @@ public class Launcher extends GameElement {
 		for (int i = 0; i < nbCat; i++) {
 			Vec2 position = getPosition();
 			set.add(Cat.create(getWorld(), new Vec2(Math.round(position.x),
-					Math.round(position.y)), new Vec2(orientation), random
-					.nextFloat()));
+					Math.round(position.y)), orientation, random.nextFloat()));
 		}
 
 		final LinkedHashSet<Bullet> setFinal = new LinkedHashSet<>();
@@ -85,7 +89,30 @@ public class Launcher extends GameElement {
 
 	@Override
 	public void draw(Graphics2D g) {
-		// TODO Auto-generated method stub
+		Vec2 vec2 = getPosition();
+		Point position = new Point(Math.round(vec2.x * Graphics.PRECISION),
+				Math.round(vec2.y * Graphics.PRECISION));
+		int sizeCanon = Math.round(0.1f * Graphics.PRECISION);
+		int lenghtCanon = Math.round(0.3f * Graphics.PRECISION);
+		int size = Math.round(0.3f * Graphics.PRECISION);
 
+		Rectangle rectangle = new Rectangle(position.x - sizeCanon / 2,
+				position.y - sizeCanon / 2, lenghtCanon, sizeCanon);
+		AffineTransform affineTransform = AffineTransform.getRotateInstance(
+				Math.acos(Vec2.dot(orientation, new Vec2(orientation.normalize(), 0))), position.x,
+				position.y);
+		Polygon polygon = new Polygon();
+		PathIterator pathIterator = rectangle.getPathIterator(affineTransform);
+		while (!pathIterator.isDone()) {
+			double[] xy = new double[2];
+			pathIterator.currentSegment(xy);
+			polygon.addPoint((int) xy[0], (int) xy[1]);
+
+			pathIterator.next();
+		}
+
+		g.fillPolygon(polygon);
+		g.fillOval(position.x - size / 2, position.y - size / 2, size, size);
+		g.fillRect(position.x - size / 2 + 1, position.y, size - 2, size / 2);
 	}
 }
