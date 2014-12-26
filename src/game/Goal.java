@@ -1,12 +1,12 @@
 package game;
 
-import java.awt.Point;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 
 import javax.swing.JWindow;
 
 import org.jbox2d.collision.shapes.PolygonShape;
+import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
@@ -22,9 +22,9 @@ public class Goal extends GameElement {
 		body.createFixture(getFixtureDef());
 	}
 
-	public static Goal create(World world, Point position) {
+	public static Goal create(World world, Vec2 vec2) {
 		BodyDef bodyDef = new BodyDef();
-		bodyDef.position.set(position.x, position.y);
+		bodyDef.position.set(vec2.x, vec2.y);
 		bodyDef.type = BodyType.STATIC;
 		bodyDef.awake = true;
 		Body body = world.createBody(bodyDef);

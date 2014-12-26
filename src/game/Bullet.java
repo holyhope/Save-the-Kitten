@@ -1,6 +1,5 @@
 package game;
 
-import java.awt.Point;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -35,14 +34,14 @@ public abstract class Bullet extends GameElement {
 		this.fixtureDef = fixtureDef;
 	}
 
-	protected static BodyDef getBodyDef(Point position, Vec2 velocity,
+	protected static BodyDef getBodyDef(Vec2 vec2, Vec2 velocity,
 			float angularVelocity) {
 		BodyDef bodyDef = new BodyDef();
 		bodyDef.type = BodyType.DYNAMIC;
 		bodyDef.bullet = true;
 		bodyDef.active = false;
-		Objects.requireNonNull(position);
-		bodyDef.position.set(position.x, position.y);
+		Objects.requireNonNull(vec2);
+		bodyDef.position.set(vec2.x, vec2.y);
 		Objects.requireNonNull(velocity);
 		bodyDef.linearVelocity = new Vec2(velocity.x, velocity.y);
 		Objects.requireNonNull(angularVelocity);

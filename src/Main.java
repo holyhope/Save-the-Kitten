@@ -4,7 +4,6 @@ import game.Launcher;
 import game.Round;
 
 import java.awt.Dimension;
-import java.awt.Point;
 
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
@@ -16,41 +15,38 @@ import org.jbox2d.dynamics.World;
 
 public class Main {
 	public static void main(String[] args) {
-		
-		 int WIDTH = 800;
-		    int HEIGHT = 600;
-		    World world = new World(new Vec2(0, 0));
-			Launcher launcher = Launcher.create(world, new Point(5, 5), 3, new Vec2(0.1f,0));
-			Round round = Round.create(new Dimension(30, 30), launcher);
-			round.add(Goal.create(world, new Point(2, 2)));
-			round.add(Goal.create(world, new Point(3, 2)));
-			round.add(Goal.create(world, new Point(2, 3)));
-			round.start();
-			if ( round.isVictory() ) {
-				System.out.println("Victory !");
-			} else if ( round.isDefeat() ) {
-				System.out.println("Defeat !");
-			}
-			
-		    Application.run("Colors", WIDTH, HEIGHT, context -> {
-		    	  
-		           }
-		        );
-		    }
-		/*World world = new World(new Vec2(0, 0));
-		Launcher launcher = Launcher.create(world, new Point(5, 5), 3, new Vec2(0.1f,0));
+
+		int WIDTH = 800;
+		int HEIGHT = 600;
+		World world = new World(new Vec2(0, 0));
+		Launcher launcher = Launcher.create(world, new Vec2(5, 5), 3,
+				new Vec2(0.1f, 0));
 		Round round = Round.create(new Dimension(30, 30), launcher);
-		round.add(Goal.create(world, new Point(2, 2)));
-		round.add(Goal.create(world, new Point(3, 2)));
-		round.add(Goal.create(world, new Point(2, 3)));
+		round.add(Goal.create(world, new Vec2(2, 2)));
+		round.add(Goal.create(world, new Vec2(3, 2)));
+		round.add(Goal.create(world, new Vec2(2, 3)));
 		round.start();
-		if ( round.isVictory() ) {
+		if (round.isVictory()) {
 			System.out.println("Victory !");
-		} else if ( round.isDefeat() ) {
+		} else if (round.isDefeat()) {
 			System.out.println("Defeat !");
-		}*/
-		
-	
+		}
+
+		Application.run("Colors", WIDTH, HEIGHT, context -> {
+
+		});
+	}
+
+	/*
+	 * World world = new World(new Vec2(0, 0)); Launcher launcher =
+	 * Launcher.create(world, new Point(5, 5), 3, new Vec2(0.1f,0)); Round round
+	 * = Round.create(new Dimension(30, 30), launcher);
+	 * round.add(Goal.create(world, new Point(2, 2)));
+	 * round.add(Goal.create(world, new Point(3, 2)));
+	 * round.add(Goal.create(world, new Point(2, 3))); round.start(); if (
+	 * round.isVictory() ) { System.out.println("Victory !"); } else if (
+	 * round.isDefeat() ) { System.out.println("Defeat !"); }
+	 */
 
 	public static void jBox2DExample(String[] args) {
 		Vec2 gravity = new Vec2(0, -10);
@@ -88,7 +84,7 @@ public class Main {
 			System.out.printf("%4.2f %4.2f %4.2f\n", position.x, position.y,
 					angle);
 		}
-		
+
 	}
-	
+
 }

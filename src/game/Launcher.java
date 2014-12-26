@@ -1,6 +1,5 @@
 package game;
 
-import java.awt.Point;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Random;
@@ -20,7 +19,7 @@ public class Launcher extends GameElement {
 	private final int nbCat;
 	private boolean stop = false;
 
-	private Launcher(Body body, Point position, int nbCat, Vec2 orientation) {
+	private Launcher(Body body, Vec2 position, int nbCat, Vec2 orientation) {
 		super(body);
 		if (nbCat <= 0) {
 			throw new IllegalArgumentException(
@@ -32,23 +31,23 @@ public class Launcher extends GameElement {
 		this.nbCat = nbCat;
 	}
 
-	public static Launcher create(World world, Point position, float strengh) {
+	public static Launcher create(World world, Vec2 position, float strengh) {
 		return create(world, position, 1, new Vec2(strengh, 0));
 	}
 
-	public static Launcher create(World world, Point position, int nbCat,
+	public static Launcher create(World world, Vec2 vec2, int nbCat,
 			Vec2 orientation) {
 		BodyDef bodyDef = new BodyDef();
 		bodyDef.type = BodyType.STATIC;
 		bodyDef.active = true;
-		Objects.requireNonNull(position);
+		Objects.requireNonNull(vec2);
 		Vec2 orientationNormalized = new Vec2();
 		orientationNormalized.set(orientation).normalize();
 		bodyDef.angle = (float) Math.acos(Vec2.dot(new Vec2(1, 0),
 				orientationNormalized));
-		bodyDef.position.set(position.x, position.y);
+		bodyDef.position.set(vec2.x, vec2.y);
 		Body body = Objects.requireNonNull(world).createBody(bodyDef);
-		Launcher launcher = new Launcher(body, position, nbCat, orientation);
+		Launcher launcher = new Launcher(body, vec2, nbCat, orientation);
 		return launcher;
 	}
 
@@ -62,7 +61,7 @@ public class Launcher extends GameElement {
 		for (int i = 0; i < nbCat; i++) {
 			set.add(Cat.create(
 					getBody().getWorld(),
-					new Point(Math.round(getBody().getPosition().x), Math
+					new Vec2(Math.round(getBody().getPosition().x), Math
 							.round(getBody().getPosition().y)), new Vec2(
 							orientation), random.nextFloat()));
 		}

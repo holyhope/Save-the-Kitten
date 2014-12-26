@@ -1,6 +1,5 @@
 package game;
 
-import java.awt.Point;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.JWindow;
@@ -14,7 +13,7 @@ public final class ParkourCat extends Bullet {
 	private AtomicInteger parkoured = new AtomicInteger();
 	private static final int maxParkour = 1;
 
-	public static ParkourCat create(World world, Point position, Vec2 velocity,
+	public static ParkourCat create(World world, Vec2 position, Vec2 velocity,
 			float angularVelocity) {
 		Body body;
 		BodyDef bodyDef = getBodyDef(position, velocity, angularVelocity);
@@ -24,7 +23,7 @@ public final class ParkourCat extends Bullet {
 		return new ParkourCat(body);
 	}
 
-	public static ParkourCat create(World world, Point position, Vec2 velocity) {
+	public static ParkourCat create(World world, Vec2 position, Vec2 velocity) {
 		return create(world, position, velocity, 0);
 	}
 

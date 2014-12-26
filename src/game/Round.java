@@ -1,7 +1,6 @@
 package game;
 
 import java.awt.Dimension;
-import java.awt.Point;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 
@@ -75,11 +74,6 @@ public class Round {
 		// Right wall
 		createWall(dimension.width + wallSize, dimension.height / 2, wallSize,
 				dimension.height / 2);
-	}
-
-	public boolean isInBoard(Point position) {
-		return position.x >= 0 && position.x < dimension.width
-				&& position.y >= 0 && position.y < dimension.height;
 	}
 
 	public boolean isInBoard(Vec2 position) {
