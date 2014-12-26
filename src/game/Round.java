@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
@@ -18,42 +19,33 @@ import org.jbox2d.dynamics.World;
 public class Round {
 	private final LinkedHashSet<Goal> goals = new LinkedHashSet<>();
 	private final LinkedHashSet<Bullet> bullets = new LinkedHashSet<>();
+	private final LinkedHashSet<Launcher> launchers = new LinkedHashSet<>();
 	private final Dimension dimension;
-	private final Launcher launcher;
 	private final World world;
 	private final float timeStep = 1.0f / 60.0f;
 	private final int velocityIterations = 6;
 	private final int positionIterations = 2;
 	private Object endLock = new Object();
+	private final AtomicBoolean started = new AtomicBoolean();
 	private static final Set<World> worldsAttached = Collections
 			.synchronizedSet(new HashSet<>());
 
-	private Round(World world, Dimension dimension, Launcher launcher) {
+	private Round(World world, Dimension dimension) {
 		Objects.requireNonNull(dimension);
 		if (dimension.width <= 0 || dimension.height <= 0) {
 			throw new IllegalArgumentException(
 					"Dimension of the board must be positive.");
 		}
 		this.dimension = new Dimension(dimension.width, dimension.height);
-		Objects.requireNonNull(launcher);
-		if (!isInBoard(launcher.getPosition())) {
-			throw new IllegalArgumentException("Launcher must be in board.");
-		}
-		this.launcher = launcher;
 		this.world = Objects.requireNonNull(world);
-		if (!launcher.isInWorld(world)) {
-			throw new IllegalArgumentException(
-					"Le launcher ne se situe pas dans ce monde.");
-		}
 		if (!worldsAttached.add(world)) {
 			throw new IllegalStateException(
 					"World is already attached to another round.");
 		}
 	}
 
-	public static Round create(World world, Dimension dimension,
-			Launcher launcher) {
-		Round round = new Round(world, dimension, launcher);
+	public static Round create(World world, Dimension dimension) {
+		Round round = new Round(world, dimension);
 		world.setContactListener(new Collide());
 		round.createWalls();
 		return round;
@@ -126,25 +118,60 @@ public class Round {
 	}
 
 	public void start() {
+		if (started.getAndSet(true)) {
+			throw new IllegalStateException("Le round a déjà démarré");
+		}
 		startLaunch();
 
 		do {
 			update();
 		} while (!isVictory() && !isDefeat());
 
-		launcher.stopLaunch();
+		stopLaunch();
 		synchronized (endLock) {
 			endLock.notifyAll();
 		}
 		endLock = new Object();
 	}
 
+	private void stopLaunch() {
+		launchers.stream().forEach(l -> l.stopLaunch());
+	}
+
 	private void startLaunch() {
-		bullets.addAll(launcher.launch());
+		launchers.stream().map(l -> l.launch()).forEach(b -> bullets.addAll(b));
 	}
 
 	public void add(Goal goal) {
-		goals.add(Objects.requireNonNull(goal));
+		if (isStarted()) {
+			throw new IllegalStateException("Le round a déjà démarré");
+		}
+		Objects.requireNonNull(goal);
+		if (!isInBoard(goal.getPosition())) {
+			throw new IllegalArgumentException("Goal must be in board.");
+		}
+		if (!goal.isInWorld(world)) {
+			throw new IllegalStateException("Goal is not in the world.");
+		}
+		goals.add(goal);
+	}
+
+	public boolean isStarted() {
+		return started.get();
+	}
+
+	public void add(Launcher launcher) {
+		if (isStarted()) {
+			throw new IllegalStateException("Le round a déjà démarré");
+		}
+		Objects.requireNonNull(launcher);
+		if (!isInBoard(launcher.getPosition())) {
+			throw new IllegalArgumentException("Launcher must be in board.");
+		}
+		if (!launcher.isInWorld(world)) {
+			throw new IllegalStateException("Launcher is not in the world.");
+		}
+		launchers.add(launcher);
 	}
 
 	public Object getEndLock() {
