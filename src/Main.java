@@ -1,9 +1,4 @@
-import fr.umlv.zen3.Application;
-import game.Goal;
-import game.Launcher;
-import game.Round;
-
-import java.awt.Dimension;
+import game.Game;
 
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
@@ -15,26 +10,8 @@ import org.jbox2d.dynamics.World;
 
 public class Main {
 	public static void main(String[] args) {
-
-		int WIDTH = 800;
-		int HEIGHT = 600;
-		World world = new World(new Vec2(0, 0));
-		Launcher launcher = Launcher.create(world, new Vec2(5, 5), 3,
-				new Vec2(0.1f, 0));
-		Round round = Round.create(new Dimension(30, 30), launcher);
-		round.add(Goal.create(world, new Vec2(2, 2)));
-		round.add(Goal.create(world, new Vec2(3, 2)));
-		round.add(Goal.create(world, new Vec2(2, 3)));
-		round.start();
-		if (round.isVictory()) {
-			System.out.println("Victory !");
-		} else if (round.isDefeat()) {
-			System.out.println("Defeat !");
-		}
-
-		Application.run("Colors", WIDTH, HEIGHT, context -> {
-
-		});
+		Game game = new Game();
+		game.runApplication();
 	}
 
 	/*

@@ -1,11 +1,10 @@
 package game;
 
+import java.awt.Graphics2D;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
-
-import javax.swing.JWindow;
 
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -59,11 +58,10 @@ public class Launcher extends GameElement {
 		final LinkedHashSet<Bullet> set = new LinkedHashSet<>();
 		Random random = new Random();
 		for (int i = 0; i < nbCat; i++) {
-			set.add(Cat.create(
-					getBody().getWorld(),
-					new Vec2(Math.round(getBody().getPosition().x), Math
-							.round(getBody().getPosition().y)), new Vec2(
-							orientation), random.nextFloat()));
+			Vec2 position = getPosition();
+			set.add(Cat.create(getWorld(), new Vec2(Math.round(position.x),
+					Math.round(position.y)), new Vec2(orientation), random
+					.nextFloat()));
 		}
 
 		final LinkedHashSet<Bullet> setFinal = new LinkedHashSet<>();
@@ -86,7 +84,7 @@ public class Launcher extends GameElement {
 	}
 
 	@Override
-	public void draw(JWindow window) {
+	public void draw(Graphics2D g) {
 		// TODO Auto-generated method stub
 
 	}

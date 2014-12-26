@@ -1,8 +1,11 @@
 package game;
 
 import java.awt.Dimension;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
@@ -17,11 +20,15 @@ public class Round {
 	private final LinkedHashSet<Bullet> bullets = new LinkedHashSet<>();
 	private final Dimension dimension;
 	private final Launcher launcher;
+	private final World world;
 	private final float timeStep = 1.0f / 60.0f;
 	private final int velocityIterations = 6;
 	private final int positionIterations = 2;
+	private Object endLock = new Object();
+	private static final Set<World> worldsAttached = Collections
+			.synchronizedSet(new HashSet<>());
 
-	private Round(Dimension dimension, Launcher launcher) {
+	private Round(World world, Dimension dimension, Launcher launcher) {
 		Objects.requireNonNull(dimension);
 		if (dimension.width <= 0 || dimension.height <= 0) {
 			throw new IllegalArgumentException(
@@ -29,27 +36,39 @@ public class Round {
 		}
 		this.dimension = new Dimension(dimension.width, dimension.height);
 		Objects.requireNonNull(launcher);
-		if (!isInBoard(launcher.getBody().getPosition())) {
+		if (!isInBoard(launcher.getPosition())) {
 			throw new IllegalArgumentException("Launcher must be in board.");
 		}
 		this.launcher = launcher;
+		this.world = Objects.requireNonNull(world);
+		if (!launcher.isInWorld(world)) {
+			throw new IllegalArgumentException(
+					"Le launcher ne se situe pas dans ce monde.");
+		}
+		if (!worldsAttached.add(world)) {
+			throw new IllegalStateException(
+					"World is already attached to another round.");
+		}
 	}
 
-	private World getWorld() {
-		return launcher.getBody().getWorld();
-	}
-
-	public static Round create(Dimension dimension, Launcher launcher) {
-		Round round = new Round(dimension, launcher);
-		round.getWorld().setContactListener(new Collide());
+	public static Round create(World world, Dimension dimension,
+			Launcher launcher) {
+		Round round = new Round(world, dimension, launcher);
+		world.setContactListener(new Collide());
 		round.createWalls();
 		return round;
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		super.finalize();
+		worldsAttached.remove(world);
 	}
 
 	private void createWall(int x, int y, int width, int height) {
 		BodyDef wallDef = new BodyDef();
 		wallDef.position.set(x, y);
-		Body wallBody = getWorld().createBody(wallDef);
+		Body wallBody = world.createBody(wallDef);
 		PolygonShape wallBox = new PolygonShape();
 		wallBox.setAsBox(width, height);
 		Fixture fixture = wallBody.createFixture(wallBox, 0);
@@ -96,22 +115,14 @@ public class Round {
 	}
 
 	private void update() {
-		try {
-			getWorld().step(timeStep, velocityIterations, positionIterations);
-		} catch (ArrayIndexOutOfBoundsException e) {
-		}
-
-		for (Bullet bullet : bullets) {
-			System.out.println("Bullet: " + bullet + " "
-					+ bullet.getBody().getPosition() + " "
-					+ (bullet.isStopped() ? "stopped" : "running") + " "
-					+ bullet.getBody().isActive());
-		}
-		for (Goal goal : goals) {
-			System.out.println("Goal: " + goal + " "
-					+ goal.getBody().getPosition());
-		}
-		System.out.println();
+		world.step(timeStep, velocityIterations, positionIterations);
+		/*
+		 * for (Bullet bullet : bullets) { System.out.println("Bullet: " +
+		 * bullet + " " + bullet.getPosition() + " " + (bullet.isStopped() ?
+		 * "stopped" : "running") + " " + bullet.isActive()); } for (Goal goal :
+		 * goals) { System.out.println("Goal: " + goal + " " +
+		 * goal.getPosition()); } System.out.println();
+		 */
 	}
 
 	public void start() {
@@ -122,6 +133,10 @@ public class Round {
 		} while (!isVictory() && !isDefeat());
 
 		launcher.stopLaunch();
+		synchronized (endLock) {
+			endLock.notifyAll();
+		}
+		endLock = new Object();
 	}
 
 	private void startLaunch() {
@@ -130,5 +145,9 @@ public class Round {
 
 	public void add(Goal goal) {
 		goals.add(Objects.requireNonNull(goal));
+	}
+
+	public Object getEndLock() {
+		return endLock;
 	}
 }

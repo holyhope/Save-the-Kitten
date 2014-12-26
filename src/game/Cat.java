@@ -1,8 +1,7 @@
 package game;
 
 import java.awt.Graphics;
-
-import javax.swing.JWindow;
+import java.awt.Graphics2D;
 
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -29,9 +28,9 @@ public final class Cat extends Bullet {
 		super(body, getFixtureDef());
 	}
 
-	
 	public void paint(Graphics g) {
-		g.fillRect(Math.round(getBody().getPosition().x), Math.round(getBody().getPosition().y), 10, 10);
+		Vec2 position = getPosition();
+		g.fillRect(Math.round(position.x), Math.round(position.y), 10, 10);
 	}
 
 	@Override
@@ -45,7 +44,7 @@ public final class Cat extends Bullet {
 	}
 
 	@Override
-	public void draw(JWindow window) {
-		
+	public void draw(Graphics2D g) {
+
 	}
 }

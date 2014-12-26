@@ -1,9 +1,8 @@
 package game;
 
+import java.awt.Graphics2D;
 import java.util.LinkedHashSet;
 import java.util.Objects;
-
-import javax.swing.JWindow;
 
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
@@ -32,15 +31,16 @@ public class Goal extends GameElement {
 	}
 
 	@Override
-	public void draw(JWindow window) {
+	public void draw(Graphics2D g) {
 		// TODO Auto-generated method stub
 
 	}
 
 	public boolean receive(Bullet bullet) {
 		Objects.requireNonNull(bullet);
-		if ( ! bullet.getBody().getWorld().equals(getBody().getWorld()) ) {
-			throw new IllegalArgumentException("Bullet and Goal are not in the same World.");
+		if (!bullet.getWorld().equals(getWorld())) {
+			throw new IllegalArgumentException(
+					"Bullet and Goal are not in the same World.");
 		}
 		return bullets.add(bullet);
 	}

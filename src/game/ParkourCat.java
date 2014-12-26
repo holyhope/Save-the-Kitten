@@ -1,8 +1,7 @@
 package game;
 
+import java.awt.Graphics2D;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.swing.JWindow;
 
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -32,7 +31,7 @@ public final class ParkourCat extends Bullet {
 	}
 
 	@Override
-	public void draw(JWindow window) {
+	public void draw(Graphics2D g) {
 		// TODO Auto-generated method stub
 	}
 
@@ -40,8 +39,8 @@ public final class ParkourCat extends Bullet {
 	public void beginContact(Body body) {
 		super.beginContact(body);
 		// TODO Test
-		if ( parkoured.getAndIncrement() < maxParkour)  {
-			getBody().setLinearVelocity(new Vec2(0, 0.1f));
+		if (parkoured.getAndIncrement() < maxParkour) {
+			setLinearVelocity(new Vec2(0, 0.1f));
 		} else {
 			stop();
 		}

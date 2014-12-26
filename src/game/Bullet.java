@@ -9,7 +9,6 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.Filter;
-import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.FixtureDef;
 
 public abstract class Bullet extends GameElement {
@@ -19,8 +18,6 @@ public abstract class Bullet extends GameElement {
 	private static AtomicInteger nbCat = new AtomicInteger();
 	private final String name = "Unamed cat (" + nbCat.getAndIncrement() + ")";
 	private boolean stopped = false;
-	private final FixtureDef fixtureDef;
-	private Fixture fixture;
 	private static final Filter filter;
 
 	static {
@@ -31,7 +28,7 @@ public abstract class Bullet extends GameElement {
 
 	protected Bullet(Body body, FixtureDef fixtureDef) {
 		super(body);
-		this.fixtureDef = fixtureDef;
+		body.createFixture(fixtureDef).setFilterData(filter);
 	}
 
 	protected static BodyDef getBodyDef(Vec2 vec2, Vec2 velocity,
@@ -72,17 +69,12 @@ public abstract class Bullet extends GameElement {
 	}
 
 	public void start() {
-		do {
-			fixture = getBody().createFixture(fixtureDef);
-		} while (fixture == null);
-		fixture.setFilterData(filter);
 		stopped = false;
-		getBody().setActive(true);
+		setActive(true);
 	}
 
 	public void stop() {
-		getBody().setActive(false);
-		getBody().destroyFixture(fixture);
+		setActive(false);
 		stopped = true;
 	}
 
