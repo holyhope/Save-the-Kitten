@@ -22,7 +22,7 @@ public class Game {
 	 */
 	public Round getRound(ApplicationContext context) {
 		World world = new World(new Vec2(0, 0));
-		Round round = Round.create(world, 30f, 30f);
+		Round round = Round.create(world, 15f, 15f);
 		round.add(Launcher
 				.create(world, new Vec2(5, 5), 3, new Vec2(0.002f, 0)));
 		round.add(Goal.create(world, new Vec2(2, 2)));
@@ -63,8 +63,8 @@ public class Game {
 	public void runApplication() {
 		Application
 				.run("Cat launcher",
-						Graphics.WIDTH,
-						Graphics.HEIGHT,
+						Graphics.WIDTH+1,
+						Graphics.HEIGHT+1,
 						context -> {
 							Round round = getRound(context);
 

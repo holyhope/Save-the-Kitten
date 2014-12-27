@@ -42,8 +42,8 @@ public abstract class GameElement {
 	 */
 	public Point getGraphicPosition() {
 		Vec2 position = body.getPosition();
-		return new Point(Math.round(position.x * Graphics.PRECISION),
-				Math.round(position.y * Graphics.PRECISION));
+		return new Point(Graphics.gameToGraphicX(position.x),
+				Graphics.gameToGraphicY(position.y));
 	}
 
 	/**

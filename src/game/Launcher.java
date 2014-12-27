@@ -110,8 +110,8 @@ public class Launcher extends GameElement {
 		Random random = new Random();
 		for (int i = 0; i < nbCat; i++) {
 			Vec2 position = getPosition();
-			set.add(Cat.create(getWorld(), new Vec2(Math.round(position.x),
-					Math.round(position.y)), orientation, random.nextFloat()));
+			set.add(Cat.create(getWorld(), new Vec2(position.x,
+					position.y), orientation, random.nextFloat()));
 		}
 
 		final LinkedHashSet<Bullet> setFinal = new LinkedHashSet<>();
@@ -138,18 +138,18 @@ public class Launcher extends GameElement {
 	 */
 	@Override
 	public void draw(Graphics2D graphics) {
-		Vec2 vec2 = getPosition();
-		Point position = new Point(Math.round(vec2.x * Graphics.PRECISION),
-				Math.round(vec2.y * Graphics.PRECISION));
+		Point position = getGraphicPosition();
 		int sizeCanon = Math.round(0.1f * Graphics.PRECISION);
 		int lenghtCanon = Math.round(0.3f * Graphics.PRECISION);
 		int size = Math.round(0.3f * Graphics.PRECISION);
 
 		Rectangle rectangle = new Rectangle(position.x - sizeCanon / 2,
 				position.y - sizeCanon / 2, lenghtCanon, sizeCanon);
+		Vec2 orientationNormalized = new Vec2(orientation);
+		orientationNormalized.normalize();
 		AffineTransform affineTransform = AffineTransform.getRotateInstance(
-				Math.acos(Vec2.dot(orientation,
-						new Vec2(orientation.normalize(), 0))), position.x,
+				Math.acos(Vec2.dot(orientationNormalized,
+						new Vec2(1, 0))), position.x,
 				position.y);
 		Polygon polygon = new Polygon();
 		PathIterator pathIterator = rectangle.getPathIterator(affineTransform);
