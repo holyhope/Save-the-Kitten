@@ -18,9 +18,21 @@ import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.World;
 
 public class Launcher extends GameElement {
+	/**
+	 * Number of millisecond between two bullet
+	 */
 	private final long waitTime = 1500;
+	/**
+	 * Orientation of the canon
+	 */
 	private final Vec2 orientation;
+	/**
+	 * Total amount of cat to launch
+	 */
 	private final int nbCat;
+	/**
+	 * True if launcher stopped
+	 */
 	private boolean stop = false;
 
 	private Launcher(Body body, Vec2 position, int nbCat, Vec2 orientation) {
@@ -35,30 +47,63 @@ public class Launcher extends GameElement {
 		this.nbCat = nbCat;
 	}
 
+	/**
+	 * Create, in world, at position, an horizontal launcher which throws 1 cat.
+	 * 
+	 * @param world
+	 *            of the launcher
+	 * @param position
+	 *            of the launcher
+	 * @param strengh
+	 *            of the canon
+	 * @return new Launcher
+	 */
 	public static Launcher create(World world, Vec2 position, float strengh) {
 		return create(world, position, 1, new Vec2(strengh, 0));
 	}
 
-	public static Launcher create(World world, Vec2 vec2, int nbCat,
+	/**
+	 * Create, in world, at position, with an orientation, a launcher which
+	 * throws number cat.
+	 * 
+	 * @param world
+	 *            of the launcher
+	 * @param position
+	 *            of the launcher
+	 * @param number
+	 *            of bullet to launch
+	 * @param orientation
+	 *            of the canon
+	 * @return new Launcher
+	 */
+	public static Launcher create(World world, Vec2 position, int number,
 			Vec2 orientation) {
 		BodyDef bodyDef = new BodyDef();
 		bodyDef.type = BodyType.STATIC;
 		bodyDef.active = true;
-		Objects.requireNonNull(vec2);
+		Objects.requireNonNull(position);
 		Vec2 orientationNormalized = new Vec2();
 		orientationNormalized.set(orientation).normalize();
 		bodyDef.angle = (float) Math.acos(Vec2.dot(new Vec2(1, 0),
 				orientationNormalized));
-		bodyDef.position.set(vec2.x, vec2.y);
+		bodyDef.position.set(position.x, position.y);
 		Body body = Objects.requireNonNull(world).createBody(bodyDef);
-		Launcher launcher = new Launcher(body, vec2, nbCat, orientation);
+		Launcher launcher = new Launcher(body, position, number, orientation);
 		return launcher;
 	}
 
+	/**
+	 * Stop launcher's launch
+	 */
 	public void stopLaunch() {
 		stop = true;
 	}
 
+	/**
+	 * Make the launcher launch its bullets
+	 * 
+	 * @return Set of bullets which will be launched
+	 */
 	public Set<Bullet> launch() {
 		final LinkedHashSet<Bullet> set = new LinkedHashSet<>();
 		Random random = new Random();
@@ -87,8 +132,11 @@ public class Launcher extends GameElement {
 		return set;
 	}
 
+	/**
+	 * Draw launcher in graphics
+	 */
 	@Override
-	public void draw(Graphics2D g) {
+	public void draw(Graphics2D graphics) {
 		Vec2 vec2 = getPosition();
 		Point position = new Point(Math.round(vec2.x * Graphics.PRECISION),
 				Math.round(vec2.y * Graphics.PRECISION));
@@ -99,7 +147,8 @@ public class Launcher extends GameElement {
 		Rectangle rectangle = new Rectangle(position.x - sizeCanon / 2,
 				position.y - sizeCanon / 2, lenghtCanon, sizeCanon);
 		AffineTransform affineTransform = AffineTransform.getRotateInstance(
-				Math.acos(Vec2.dot(orientation, new Vec2(orientation.normalize(), 0))), position.x,
+				Math.acos(Vec2.dot(orientation,
+						new Vec2(orientation.normalize(), 0))), position.x,
 				position.y);
 		Polygon polygon = new Polygon();
 		PathIterator pathIterator = rectangle.getPathIterator(affineTransform);
@@ -111,8 +160,10 @@ public class Launcher extends GameElement {
 			pathIterator.next();
 		}
 
-		g.fillPolygon(polygon);
-		g.fillOval(position.x - size / 2, position.y - size / 2, size, size);
-		g.fillRect(position.x - size / 2 + 1, position.y, size - 2, size / 2);
+		graphics.fillPolygon(polygon);
+		graphics.fillOval(position.x - size / 2, position.y - size / 2, size,
+				size);
+		graphics.fillRect(position.x - size / 2 + 1, position.y, size - 2,
+				size / 2);
 	}
 }

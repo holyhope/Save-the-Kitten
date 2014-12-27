@@ -13,12 +13,25 @@ import org.jbox2d.dynamics.FixtureDef;
 
 public abstract class Bullet extends GameElement {
 	/**
-	 * Let name cat with integer if not specified
+	 * Total amount of cat
 	 */
 	private static AtomicInteger nbCat = new AtomicInteger();
+	/**
+	 * Let name cat with integer if not specified
+	 */
 	private final String name = "Unamed cat (" + nbCat.getAndIncrement() + ")";
+	/**
+	 * True if bullet is not active
+	 */
 	private boolean stopped = false;
+	/**
+	 * Filter contact
+	 */
 	private static final Filter filter;
+	/**
+	 * Used to activate and deactivate bullet
+	 */
+	private final Object lockActive = new Object();
 
 	static {
 		filter = new Filter();
@@ -61,6 +74,11 @@ public abstract class Bullet extends GameElement {
 		return name;
 	}
 
+	/**
+	 * Called when cat contact another body.
+	 * 
+	 * @param body
+	 */
 	public void beginContact(Body body) {
 		Object object = body.getUserData();
 		if (object instanceof Goal) {
@@ -68,19 +86,37 @@ public abstract class Bullet extends GameElement {
 		}
 	}
 
+	/**
+	 * Active the bullet
+	 */
 	public void start() {
-		stopped = false;
-		setActive(true);
+		synchronized (lockActive) {
+			stopped = false;
+			setActive(true);
+		}
 	}
 
+	/**
+	 * Deactive the bullet.
+	 */
 	public void stop() {
-		setActive(false);
-		stopped = true;
+		synchronized (lockActive) {
+			setActive(false);
+			stopped = true;
+		}
 	}
 
+	/**
+	 * Check if the bullet don't move
+	 * 
+	 * @return True if bullet is not active
+	 */
 	public boolean isStopped() {
 		return stopped;
 	}
 
+	/**
+	 * Called when contact with another body is ended
+	 */
 	public abstract void endContact(Body body);
 }

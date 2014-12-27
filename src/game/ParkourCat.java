@@ -9,9 +9,28 @@ import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.World;
 
 public final class ParkourCat extends Bullet {
+	/**
+	 * Number of wall climbed by the cat
+	 */
 	private AtomicInteger parkoured = new AtomicInteger();
+	/**
+	 * Number of wall that the cat is able to climb
+	 */
 	private static final int maxParkour = 1;
 
+	/**
+	 * Create a parkourCat in world at position with some velocity
+	 * 
+	 * @param world
+	 *            of the cat
+	 * @param position
+	 *            of the cat
+	 * @param velocity
+	 *            of the cat
+	 * @param angularVelocity
+	 *            of the cat. Make it roll !
+	 * @return new ParkourCat
+	 */
 	public static ParkourCat create(World world, Vec2 position, Vec2 velocity,
 			float angularVelocity) {
 		Body body;
@@ -22,6 +41,17 @@ public final class ParkourCat extends Bullet {
 		return new ParkourCat(body);
 	}
 
+	/**
+	 * Create a parkourCat
+	 * 
+	 * @param world
+	 *            of the cat
+	 * @param position
+	 *            of the cat
+	 * @param velocity
+	 *            of the cat
+	 * @return new ParkourCat
+	 */
 	public static ParkourCat create(World world, Vec2 position, Vec2 velocity) {
 		return create(world, position, velocity, 0);
 	}

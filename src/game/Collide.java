@@ -15,11 +15,16 @@ public class Collide implements ContactListener {
 		System.out.println("collision: " + bodyA.getUserData() + " - "
 				+ bodyB.getUserData());
 
-		BulletBeginContact(bodyA.getUserData(), bodyB);
-		BulletBeginContact(bodyB.getUserData(), bodyA);
+		bulletBeginContact(bodyA.getUserData(), bodyB);
+		bulletBeginContact(bodyB.getUserData(), bodyA);
 	}
 
-	private void BulletBeginContact(Object bullet, Body body) {
+	/**
+	 * Call bullet.beginContact(body) if bullet is effectively a Bullet
+	 * @param bullet
+	 * @param body
+	 */
+	private void bulletBeginContact(Object bullet, Body body) {
 		if (!(bullet instanceof Bullet)) {
 			return;
 		}
@@ -34,15 +39,20 @@ public class Collide implements ContactListener {
 		System.out.println("collision: " + bodyA.getUserData() + " - "
 				+ bodyB.getUserData());
 
-		BulletEndContact(bodyA.getUserData(), bodyB);
-		BulletEndContact(bodyB.getUserData(), bodyA);
+		bulletEndContact(bodyA.getUserData(), bodyB);
+		bulletEndContact(bodyB.getUserData(), bodyA);
 	}
 
-	private void BulletEndContact(Object bullet, Body body) {
+	/**
+	 * Call bullet.endContact(body) if bullet is effectively a Bullet
+	 * @param bullet
+	 * @param body
+	 */
+	private void bulletEndContact(Object bullet, Body body) {
 		if (!(bullet instanceof Bullet)) {
 			return;
 		}
-		((Bullet) bullet).beginContact(body);
+		((Bullet) bullet).endContact(body);
 	}
 
 	@Override

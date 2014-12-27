@@ -18,8 +18,8 @@ public final class Cat extends Bullet {
 	 * @param velocity
 	 *            of the cat
 	 * @param angularVelocity
-	 *            of the cat. Make it rolling.
-	 * @return
+	 *            of the cat. Make it roll !
+	 * @return new Cat
 	 */
 	public static Cat create(World world, Vec2 position, Vec2 velocity,
 			float angularVelocity) {
@@ -41,7 +41,7 @@ public final class Cat extends Bullet {
 	 *            of the cat
 	 * @param velocity
 	 *            of the cat
-	 * @return
+	 * @return new Cat
 	 */
 	public static Cat create(World world, Vec2 position, Vec2 velocity) {
 		return create(world, position, velocity, 0);
@@ -52,7 +52,10 @@ public final class Cat extends Bullet {
 	}
 
 	/**
-	 * Called when cat contact another body
+	 * Stop the cat.
+	 * 
+	 * @param body
+	 *            of the other element.
 	 */
 	@Override
 	public void beginContact(Body body) {
@@ -60,9 +63,6 @@ public final class Cat extends Bullet {
 		stop();
 	}
 
-	/**
-	 * Called on contact end
-	 */
 	@Override
 	public void endContact(Body body) {
 	}

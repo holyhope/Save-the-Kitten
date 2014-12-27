@@ -3,6 +3,7 @@ package game;
 import java.awt.Graphics2D;
 import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
@@ -14,6 +15,7 @@ import org.jbox2d.dynamics.World;
 
 public class Goal extends GameElement {
 	private final int nbSlot = 1;
+	private final AtomicInteger nbCat = new AtomicInteger();
 	private final LinkedHashSet<Bullet> bullets = new LinkedHashSet<>();
 
 	private Goal(Body body) {
@@ -30,23 +32,43 @@ public class Goal extends GameElement {
 		return new Goal(body);
 	}
 
+	/**
+	 * Draw goal on graphics
+	 */
 	@Override
-	public void draw(Graphics2D g) {
+	public void draw(Graphics2D graphics) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/**
+	 * Receive a bullet.
+	 * 
+	 * @param bullet
+	 *            caught by the goal
+	 * @return False if cat cannot be received by the goal
+	 */
 	public boolean receive(Bullet bullet) {
 		Objects.requireNonNull(bullet);
 		if (!bullet.getWorld().equals(getWorld())) {
 			throw new IllegalArgumentException(
 					"Bullet and Goal are not in the same World.");
 		}
-		return bullets.add(bullet);
+		if (nbCat.getAndIncrement() >= nbSlot || !bullets.add(bullet)) {
+			nbCat.decrementAndGet();
+			return false;
+		}
+		bullet.stop();
+		return true;
 	}
 
+	/**
+	 * Check if goal can receive more bullets
+	 * 
+	 * @return True if goal is full
+	 */
 	public boolean isFull() {
-		return nbSlot == bullets.size();
+		return nbSlot == nbCat.get();
 	}
 
 	private static FixtureDef getFixtureDef() {
