@@ -1,6 +1,7 @@
 package game;
 
 import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -79,5 +80,11 @@ public class Goal extends GameElement {
 		fixtureDef.density = 1;
 		fixtureDef.friction = 0.3f;
 		return fixtureDef;
+	}
+
+	@Override
+	public Shape getGraphicShape() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

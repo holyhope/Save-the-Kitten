@@ -1,6 +1,11 @@
 package game;
 
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Shape;
+import java.awt.geom.Ellipse2D;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -23,15 +28,11 @@ public abstract class Bullet extends GameElement {
 	/**
 	 * True if bullet is not active
 	 */
-	private boolean stopped = false;
+	private AtomicBoolean stopped = new AtomicBoolean();
 	/**
 	 * Filter contact
 	 */
 	private static final Filter filter;
-	/**
-	 * Used to activate and deactivate bullet
-	 */
-	private final Object lockActive = new Object();
 
 	static {
 		filter = new Filter();
@@ -59,10 +60,30 @@ public abstract class Bullet extends GameElement {
 		return bodyDef;
 	}
 
+	@Override
+	public Shape getGraphicShape() {
+		Point position = getGraphicPosition();
+		int size = Math.round(getRadius() * Graphics.PRECISION);
+		return new Ellipse2D.Float(position.x, position.y, size, size);
+	}
+
+	/**
+	 * Paint bullet on graphics
+	 * 
+	 * @param graphics
+	 */
+	@Override
+	public void draw(Graphics2D graphics) {
+		if ( isActive() && ! isStopped() ) {
+			graphics.fill(getGraphicShape());
+		}
+	}
+
 	protected static FixtureDef getFixtureDef() {
 		final FixtureDef fixtureDef = new FixtureDef();
 		PolygonShape dynamicBox = new PolygonShape();
-		dynamicBox.setAsBox(1, 1);
+		dynamicBox.setRadius(0.1f);
+		//dynamicBox.setAsBox(1, 1);
 		fixtureDef.shape = dynamicBox;
 		fixtureDef.density = 1;
 		fixtureDef.friction = 0.3f;
@@ -90,8 +111,7 @@ public abstract class Bullet extends GameElement {
 	 * Active the bullet
 	 */
 	public void start() {
-		synchronized (lockActive) {
-			stopped = false;
+		if ( stopped.getAndSet(false) ) {
 			setActive(true);
 		}
 	}
@@ -100,9 +120,8 @@ public abstract class Bullet extends GameElement {
 	 * Deactive the bullet.
 	 */
 	public void stop() {
-		synchronized (lockActive) {
+		if ( stopped.getAndSet(true) ) {
 			setActive(false);
-			stopped = true;
 		}
 	}
 
@@ -112,7 +131,7 @@ public abstract class Bullet extends GameElement {
 	 * @return True if bullet is not active
 	 */
 	public boolean isStopped() {
-		return stopped;
+		return stopped.get();
 	}
 
 	/**

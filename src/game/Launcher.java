@@ -4,6 +4,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
 import java.util.LinkedHashSet;
@@ -165,5 +166,11 @@ public class Launcher extends GameElement {
 				size);
 		graphics.fillRect(position.x - size / 2 + 1, position.y, size - 2,
 				size / 2);
+	}
+
+	@Override
+	public Shape getGraphicShape() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

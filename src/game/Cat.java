@@ -1,7 +1,5 @@
 package game;
 
-import java.awt.Graphics2D;
-
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
@@ -65,17 +63,5 @@ public final class Cat extends Bullet {
 
 	@Override
 	public void endContact(Body body) {
-	}
-
-	/**
-	 * Paint cat on graphics
-	 * 
-	 * @param graphics
-	 */
-	@Override
-	public void draw(Graphics2D graphics) {
-		Vec2 position = getPosition();
-		graphics.fillRect(Math.round(position.x), Math.round(position.y), 10,
-				10);
 	}
 }
