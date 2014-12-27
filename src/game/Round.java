@@ -16,20 +16,49 @@ import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.World;
 
 public class Round {
+	/**
+	 * List of Goals
+	 */
 	private final LinkedHashSet<Goal> goals = new LinkedHashSet<>();
+	/**
+	 * List of Bullets
+	 */
 	private final LinkedHashSet<Bullet> bullets = new LinkedHashSet<>();
+	/**
+	 * List of launchers
+	 */
 	private final LinkedHashSet<Launcher> launchers = new LinkedHashSet<>();
+	/**
+	 * Width of the area
+	 */
 	private final float width;
+	/**
+	 * Height of the area
+	 */
 	private final float height;
+	/**
+	 * World of the round
+	 */
 	private final World world;
+	/**
+	 * Time use for calculating step of the round
+	 */
 	private final float timeStep = 1.0f / 60.0f;
 	private final int velocityIterations = 6;
 	private final int positionIterations = 2;
-	private Object endLock = new Object();
+	/**
+	 * Lock use for waiting end of the round
+	 */
+	private final Object endLock = new Object();
+	/**
+	 * True if the round already started
+	 */
 	private final AtomicBoolean started = new AtomicBoolean();
+	/**
+	 * List of all world where a round is already attached
+	 */
 	private static final Set<World> worldsAttached = Collections
 			.synchronizedSet(new HashSet<>());
-	private final float wallSize = 0.9f;
 
 	private Round(World world, float width, float height) {
 		if (width <= 0 || height <= 0) {
@@ -58,6 +87,18 @@ public class Round {
 		worldsAttached.remove(world);
 	}
 
+	/**
+	 * Create a wall in the world
+	 * 
+	 * @param x
+	 *            position of the wall
+	 * @param y
+	 *            position of the wall
+	 * @param width
+	 *            of the wall
+	 * @param height
+	 *            of the wall
+	 */
 	private void createWall(float x, float y, float width, float height) {
 		BodyDef wallDef = new BodyDef();
 		wallDef.position.set(x, y);
@@ -71,7 +112,11 @@ public class Round {
 		fixture.setFilterData(filter);
 	}
 
+	/**
+	 * Create 4 walls around the area of the round
+	 */
 	private void createWalls() {
+		float wallSize = 0.9f;
 		// Bottom Wall
 		createWall(width / 2, -wallSize, width / 2 + wallSize, wallSize);
 		// Top wall
@@ -82,23 +127,50 @@ public class Round {
 		createWall(width + wallSize, height / 2, wallSize, height / 2);
 	}
 
+	/**
+	 * Get collections of all launcher
+	 * 
+	 * @return unmodifiable set of launchers
+	 */
 	public Set<Launcher> getLaunchers() {
-		return launchers;
+		return Collections.unmodifiableSet(launchers);
 	}
 
+	/**
+	 * Get collections of all bullet
+	 * 
+	 * @return unmodifiable set of bullets
+	 */
 	public Set<Bullet> getBullets() {
-		return bullets;
+		return Collections.unmodifiableSet(bullets);
 	}
 
+	/**
+	 * Get collections of all goal
+	 * 
+	 * @return unmodifiable set of goals
+	 */
 	public Set<Goal> getGoals() {
-		return goals;
+		return Collections.unmodifiableSet(goals);
 	}
 
-	public boolean isInBoard(Vec2 position) {
+	/**
+	 * Check if position is in area
+	 * 
+	 * @param position
+	 *            to check
+	 * @return True if position is in area
+	 */
+	public boolean isInArea(Vec2 position) {
 		return position.x >= 0 && position.x < width && position.y >= 0
 				&& position.y < height;
 	}
 
+	/**
+	 * Check if the round ended by a victory
+	 * 
+	 * @return True if victory
+	 */
 	public boolean isVictory() {
 		for (Goal goal : goals) {
 			if (!goal.isFull()) {
@@ -108,11 +180,19 @@ public class Round {
 		return true;
 	}
 
+	/**
+	 * Check if the round ended with a defeat
+	 * 
+	 * @return True if defeat
+	 */
 	public boolean isDefeat() {
 		return bullets.stream().map(bullet -> bullet.isStopped())
 				.reduce(false, (a, b) -> a || b);
 	}
 
+	/**
+	 * Calculation of a new step
+	 */
 	private void update() {
 		try {
 			world.step(timeStep, velocityIterations, positionIterations);
@@ -128,6 +208,9 @@ public class Round {
 		 */
 	}
 
+	/**
+	 * Let's the round begin !
+	 */
 	public void start() {
 		if (started.getAndSet(true)) {
 			throw new IllegalStateException("Le round a déjà démarré");
@@ -142,23 +225,50 @@ public class Round {
 		synchronized (endLock) {
 			endLock.notifyAll();
 		}
-		endLock = new Object();
 	}
 
+	/**
+	 * Make current thread waiting for the end of the round.
+	 */
+	public void waitForEnd() {
+		synchronized (endLock) {
+			while (!isVictory() && !isDefeat()) {
+				try {
+					endLock.wait();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	/**
+	 * Stop all launcher
+	 */
 	private void stopLaunch() {
 		launchers.stream().forEach(l -> l.stopLaunch());
 	}
 
+	/**
+	 * Run all launcher
+	 */
 	private void startLaunch() {
 		launchers.stream().map(l -> l.launch()).forEach(b -> bullets.addAll(b));
 	}
 
+	/**
+	 * Add a goal to the round
+	 * 
+	 * @param goal
+	 *            to add
+	 */
 	public void add(Goal goal) {
 		if (isStarted()) {
 			throw new IllegalStateException("Le round a déjà démarré");
 		}
 		Objects.requireNonNull(goal);
-		if (!isInBoard(goal.getPosition())) {
+		if (!isInArea(goal.getPosition())) {
 			throw new IllegalArgumentException("Goal must be in board.");
 		}
 		if (!goal.isInWorld(world)) {
@@ -167,16 +277,27 @@ public class Round {
 		goals.add(goal);
 	}
 
+	/**
+	 * Check if round already started
+	 * 
+	 * @return True if round started
+	 */
 	public boolean isStarted() {
 		return started.get();
 	}
 
+	/**
+	 * Add launcher to the round
+	 * 
+	 * @param launcher
+	 *            to add
+	 */
 	public void add(Launcher launcher) {
 		if (isStarted()) {
 			throw new IllegalStateException("Le round a déjà démarré");
 		}
 		Objects.requireNonNull(launcher);
-		if (!isInBoard(launcher.getPosition())) {
+		if (!isInArea(launcher.getPosition())) {
 			throw new IllegalArgumentException("Launcher must be in board.");
 		}
 		if (!launcher.isInWorld(world)) {
@@ -185,14 +306,20 @@ public class Round {
 		launchers.add(launcher);
 	}
 
-	public Object getEndLock() {
-		return endLock;
-	}
-
+	/**
+	 * Get width of the area
+	 * 
+	 * @return width
+	 */
 	public float getWidth() {
 		return width;
 	}
 
+	/**
+	 * Get height of the area
+	 * 
+	 * @return height
+	 */
 	public float getHeight() {
 		return height;
 	}

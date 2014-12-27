@@ -67,15 +67,15 @@ public class RoundTest {
 	public void testIsInBoard() {
 		World world = new World(new Vec2(0, 0));
 		Round round = Round.create(world, 500, 500);
-		assertTrue(round.isInBoard(new Vec2(25, 250)));
-		assertTrue(round.isInBoard(new Vec2(0, 0)));
-		assertTrue(round.isInBoard(new Vec2(499, 499)));
-		assertFalse(round.isInBoard(new Vec2(500, 250)));
-		assertFalse(round.isInBoard(new Vec2(25, -3)));
+		assertTrue(round.isInArea(new Vec2(25, 250)));
+		assertTrue(round.isInArea(new Vec2(0, 0)));
+		assertTrue(round.isInArea(new Vec2(499, 499)));
+		assertFalse(round.isInArea(new Vec2(500, 250)));
+		assertFalse(round.isInArea(new Vec2(25, -3)));
 	}
 
 	@Test(expected = NullPointerException.class)
 	public void testIsInBoardNull() {
-		Round.create(new World(new Vec2(0, 0)), 15, 15).isInBoard(null);
+		Round.create(new World(new Vec2(0, 0)), 15, 15).isInArea(null);
 	}
 }
