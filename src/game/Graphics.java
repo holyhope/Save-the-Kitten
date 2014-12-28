@@ -101,7 +101,7 @@ public class Graphics {
 		graphics.setColor(Color.BLUE);
 		round.getGoals().stream().forEach(e -> e.draw(graphics));
 
-		graphics.setColor(Color.BLUE);
+		graphics.setColor(Color.PINK);
 		round.getBullets().stream().forEach(e -> e.draw(graphics));
 
 		graphics2D.drawImage(image, AffineTransform.getScaleInstance(WIDTH

@@ -1,6 +1,7 @@
 package game;
 
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Shape;
 import java.util.LinkedHashSet;
 import java.util.Objects;
@@ -38,7 +39,10 @@ public class Goal extends GameElement {
 	 */
 	@Override
 	public void draw(Graphics2D graphics) {
-		// TODO Auto-generated method stub
+		Point position = getGraphicPosition();
+		System.out.println("Position Gx : " + position.x + " Position y : " + position.y);
+		graphics.fillRect(position.x , position.y, 20,
+				20);
 
 	}
 

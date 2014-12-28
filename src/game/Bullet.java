@@ -62,7 +62,9 @@ public abstract class Bullet extends GameElement {
 	@Override
 	public Shape getGraphicShape() {
 		Point position = getGraphicPosition();
+		//System.out.println("Position x : " + position.x + " Position y : " + position.y);
 		float radius = getRadius();
+		//System.out.println("Radius x : " + Graphics.gameToGraphicX(radius) + " Radius y : " + Graphics.gameToGraphicY(radius));
 		return new Ellipse2D.Float(position.x, position.y,
 				Graphics.gameToGraphicX(radius),
 				Graphics.gameToGraphicY(radius));
@@ -76,7 +78,11 @@ public abstract class Bullet extends GameElement {
 	@Override
 	public void draw(Graphics2D graphics) {
 		if (isActive() && !isStopped()) {
-			graphics.fill(getGraphicShape());
+			Point position = getGraphicPosition();
+			//graphics.fill(getGraphicShape());
+			System.out.println("Position x : " + position.x + " Position y : " + position.y);
+			graphics.fillRect(position.x , position.y, 20,
+				20);
 		}
 	}
 

@@ -7,6 +7,7 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Random;
@@ -22,7 +23,7 @@ public class Launcher extends GameElement {
 	/**
 	 * Number of millisecond between two bullet
 	 */
-	private final long waitTime = 1500;
+	private final long waitTime = 250;
 	/**
 	 * Orientation of the canon
 	 */
@@ -113,9 +114,17 @@ public class Launcher extends GameElement {
 			set.add(Cat.create(getWorld(), new Vec2(position.x,
 					position.y), orientation, random.nextFloat()));
 		}
-
 		final LinkedHashSet<Bullet> setFinal = new LinkedHashSet<>();
 		setFinal.addAll(set);
+		Iterator<Bullet> bullets = setFinal.iterator();
+		int i = 0;
+		while(bullets.hasNext()){
+			Vec2 position = bullets.next().getPosition();
+			System.out.println(i + " -- > Position x : " + position.x + " Position y : " + position.y);
+			i++;
+		}
+		/*Vec2 position = setFinal.iterator().next().getPosition();
+		System.out.println("Position x : " + position.x + " Position y : " + position.y);*/
 		new Thread(() -> {
 			for (Bullet bullet : setFinal) {
 				if (stop) {

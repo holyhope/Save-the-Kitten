@@ -24,10 +24,10 @@ public class Game {
 		World world = new World(new Vec2(0, 0));
 		Round round = Round.create(world, 15f, 15f);
 		round.add(Launcher
-				.create(world, new Vec2(5, 5), 3, new Vec2(0.002f, 0)));
-		round.add(Goal.create(world, new Vec2(2, 2)));
-		round.add(Goal.create(world, new Vec2(3, 2)));
-		round.add(Goal.create(world, new Vec2(2, 3)));
+				.create(world, new Vec2(5, 5), 1, new Vec2(-0.001f, -0.001f)));
+		round.add(Goal.create(world, new Vec2(3, 3)));
+		/*round.add(Goal.create(world, new Vec2(3, 2)));
+		round.add(Goal.create(world, new Vec2(2, 3)));*/
 		return round;
 	}
 
