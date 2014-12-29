@@ -199,19 +199,6 @@ public class Round {
 		} catch (Exception e) {
 			// TODO
 		}
-
-		/*
-		for (Bullet bullet : bullets) {
-			System.out.println("Bullet: " + bullet + " " + bullet.getPosition()
-					+ " " + (bullet.isStopped() ? "stopped" : "running") + " "
-					+ bullet.isActive());
-		}
-		for (Goal goal : goals) {
-			System.out.println("Goal: " + goal + " " + goal.getPosition());
-		}
-		System.out.println();
-		*/
-
 	}
 
 	/**

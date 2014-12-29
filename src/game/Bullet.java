@@ -4,6 +4,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
+import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -14,6 +15,7 @@ import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.Filter;
 import org.jbox2d.dynamics.FixtureDef;
+import org.jbox2d.dynamics.World;
 
 public abstract class Bullet extends GameElement {
 	/**
@@ -23,7 +25,8 @@ public abstract class Bullet extends GameElement {
 	/**
 	 * Let name cat with integer if not specified
 	 */
-	private final String name = "Unamed cat (" + nbCat.getAndIncrement() + ")";
+	private final String name = "Unamed bullet (" + nbCat.getAndIncrement()
+			+ ")";
 	/**
 	 * True if bullet is not active
 	 */
@@ -62,12 +65,9 @@ public abstract class Bullet extends GameElement {
 	@Override
 	public Shape getGraphicShape() {
 		Point position = getGraphicPosition();
-		//System.out.println("Position x : " + position.x + " Position y : " + position.y);
-		float radius = getRadius();
-		//System.out.println("Radius x : " + Graphics.gameToGraphicX(radius) + " Radius y : " + Graphics.gameToGraphicY(radius));
-		return new Ellipse2D.Float(position.x, position.y,
-				Graphics.gameToGraphicX(radius),
-				Graphics.gameToGraphicY(radius));
+		int radius = Math.abs(Graphics.gameToGraphicX(getRadius()));
+		return new Ellipse2D.Float(position.x - radius, position.y - radius,
+				radius * 2, radius * 2);
 	}
 
 	/**
@@ -77,13 +77,28 @@ public abstract class Bullet extends GameElement {
 	 */
 	@Override
 	public void draw(Graphics2D graphics) {
-		if (isActive() && !isStopped()) {
-			Point position = getGraphicPosition();
-			//graphics.fill(getGraphicShape());
-			System.out.println("Position x : " + position.x + " Position y : " + position.y);
-			graphics.fillRect(position.x , position.y, 20,
-				20);
+		if (isActive() || isStopped()) {
+			super.draw(graphics);
 		}
+	}
+
+	/**
+	 * 
+	 * @param classValue
+	 * @return
+	 * @throws NoSuchMethodException
+	 * @throws SecurityException
+	 * @throws IllegalAccessException
+	 */
+	public static Method getConstructor(Class<? extends Bullet> classValue)
+			throws NoSuchMethodException, SecurityException,
+			IllegalAccessException {
+		Method method = classValue.getDeclaredMethod("create", World.class,
+				Vec2.class, Vec2.class, Float.class);
+		if (Bullet.class.isInstance(method.getReturnType())) {
+			throw new IllegalAccessException();
+		}
+		return method;
 	}
 
 	protected static FixtureDef getFixtureDef() {
@@ -99,7 +114,7 @@ public abstract class Bullet extends GameElement {
 
 	@Override
 	public String toString() {
-		return name;
+		return name + " " + getPosition();
 	}
 
 	/**
@@ -118,7 +133,6 @@ public abstract class Bullet extends GameElement {
 	 * Active the bullet
 	 */
 	public void start() {
-		stopped = false;
 		setActive(true);
 	}
 

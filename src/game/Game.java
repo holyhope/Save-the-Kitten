@@ -2,6 +2,7 @@ package game;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.lang.reflect.InvocationTargetException;
 
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.World;
@@ -19,15 +20,23 @@ public class Game {
 	 * @param context
 	 *            of the current game
 	 * @return new Round
+	 * @throws SecurityException
+	 * @throws NoSuchMethodException
+	 * @throws InvocationTargetException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
 	 */
-	public Round getRound(ApplicationContext context) {
+	public Round getRound(ApplicationContext context)
+			throws IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException, NoSuchMethodException, SecurityException {
 		World world = new World(new Vec2(0, 0));
-		Round round = Round.create(world, 15f, 15f);
-		round.add(Launcher
-				.create(world, new Vec2(5, 5), 1, new Vec2(-0.001f, -0.001f)));
+		Round round = Round.create(world, 5f, 5f);
+		Launcher launcher = Launcher.create(world, new Vec2(3, 2), 1, new Vec2(
+				-0.001f, -0.001f));
+		launcher.addBullet(Cat.class);
+		round.add(launcher);
 		round.add(Goal.create(world, new Vec2(3, 3)));
-		/*round.add(Goal.create(world, new Vec2(3, 2)));
-		round.add(Goal.create(world, new Vec2(2, 3)));*/
+		round.add(Goal.create(world, new Vec2(2, 3)));
 		return round;
 	}
 
@@ -63,12 +72,21 @@ public class Game {
 	public void runApplication() {
 		Application
 				.run("Cat launcher",
-						Graphics.WIDTH+1,
-						Graphics.HEIGHT+1,
+						Graphics.WIDTH + 1,
+						Graphics.HEIGHT + 1,
 						context -> {
-							Round round = getRound(context);
+							Round roundTmp = null;
+							do {
+								try {
+									roundTmp = getRound(context);
+								} catch (Throwable e) {
+									Graphics.addException(context, e);
+								}
+							} while (roundTmp == null);
 
 							waitForStart(context);
+
+							final Round round = roundTmp;
 
 							new Thread(() -> {
 								round.start();
@@ -83,7 +101,7 @@ public class Game {
 									previous = System.currentTimeMillis();
 								} else {
 									try {
-										Thread.sleep(5);
+										Thread.sleep(1);
 									} catch (Exception e) {
 										// TODO Auto-generated catch block
 										e.printStackTrace();
@@ -91,7 +109,6 @@ public class Game {
 								}
 							}
 
-							System.out.println("end.");
 							EndRound(round, context);
 						});
 	}
@@ -106,6 +123,7 @@ public class Game {
 	 */
 	private void EndRound(Round round, ApplicationContext context) {
 		context.render(g -> {
+			Graphics.update(g, round);
 			g.setFont(new Font("Helvetica", Font.CENTER_BASELINE, 20));
 			if (round.isVictory()) {
 				g.setColor(Color.BLUE);
@@ -116,5 +134,6 @@ public class Game {
 			}
 			g.dispose();
 		});
+		System.out.println("end.");
 	}
 }

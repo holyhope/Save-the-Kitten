@@ -1,17 +1,17 @@
 package game;
 
-import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.PathIterator;
-import java.util.Iterator;
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
+import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Function;
 
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -29,13 +29,17 @@ public class Launcher extends GameElement {
 	 */
 	private final Vec2 orientation;
 	/**
-	 * Total amount of cat to launch
+	 * List of bullets which will be launched
 	 */
-	private final int nbCat;
+	private final ConcurrentLinkedQueue<Bullet> bullets = new ConcurrentLinkedQueue<>();
 	/**
 	 * True if launcher stopped
 	 */
 	private boolean stop = false;
+	/**
+	 * Used for generating random angle for launched bullets.
+	 */
+	private final Random randomAngle = new Random();
 
 	private Launcher(Body body, Vec2 position, int nbCat, Vec2 orientation) {
 		super(body);
@@ -46,7 +50,6 @@ public class Launcher extends GameElement {
 		Objects.requireNonNull(position);
 		Objects.requireNonNull(orientation);
 		this.orientation = new Vec2(orientation.x, orientation.y);
-		this.nbCat = nbCat;
 	}
 
 	/**
@@ -102,31 +105,40 @@ public class Launcher extends GameElement {
 	}
 
 	/**
+	 * Add a bullet to the canon.
+	 * 
+	 * @param Class
+	 *            of the new bullet
+	 * @return True in case of success.
+	 * @throws SecurityException
+	 * @throws NoSuchMethodException
+	 *             if callValue does not have static create method
+	 * @throws InvocationTargetException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 */
+	public boolean addBullet(Class<? extends Bullet> classValue)
+			throws IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException, NoSuchMethodException, SecurityException {
+		return bullets.add((Bullet) Bullet.getConstructor(classValue).invoke(
+				null, getWorld(), getPosition(), orientation,
+				randomAngle.nextFloat()));
+	}
+
+	/**
 	 * Make the launcher launch its bullets
 	 * 
 	 * @return Set of bullets which will be launched
 	 */
 	public Set<Bullet> launch() {
+		ConcurrentLinkedQueue<Bullet> bullets = new ConcurrentLinkedQueue<Bullet>();
+		bullets.addAll(this.bullets);
 		final LinkedHashSet<Bullet> set = new LinkedHashSet<>();
-		Random random = new Random();
-		for (int i = 0; i < nbCat; i++) {
-			Vec2 position = getPosition();
-			set.add(Cat.create(getWorld(), new Vec2(position.x,
-					position.y), orientation, random.nextFloat()));
-		}
-		final LinkedHashSet<Bullet> setFinal = new LinkedHashSet<>();
-		setFinal.addAll(set);
-		Iterator<Bullet> bullets = setFinal.iterator();
-		int i = 0;
-		while(bullets.hasNext()){
-			Vec2 position = bullets.next().getPosition();
-			System.out.println(i + " -- > Position x : " + position.x + " Position y : " + position.y);
-			i++;
-		}
-		/*Vec2 position = setFinal.iterator().next().getPosition();
-		System.out.println("Position x : " + position.x + " Position y : " + position.y);*/
+		set.addAll(bullets);
+
 		new Thread(() -> {
-			for (Bullet bullet : setFinal) {
+			Bullet bullet;
+			while ((bullet = bullets.poll()) != null) {
 				if (stop) {
 					return;
 				}
@@ -143,43 +155,36 @@ public class Launcher extends GameElement {
 	}
 
 	/**
-	 * Draw launcher in graphics
+	 * Get the radius of the element.
+	 * 
+	 * @return radius of the element.
 	 */
-	@Override
-	public void draw(Graphics2D graphics) {
-		Point position = getGraphicPosition();
-		int sizeCanon = Math.round(0.1f * Graphics.PRECISION);
-		int lenghtCanon = Math.round(0.3f * Graphics.PRECISION);
-		int size = Math.round(0.3f * Graphics.PRECISION);
-
-		Rectangle rectangle = new Rectangle(position.x - sizeCanon / 2,
-				position.y - sizeCanon / 2, lenghtCanon, sizeCanon);
-		Vec2 orientationNormalized = new Vec2(orientation);
-		orientationNormalized.normalize();
-		AffineTransform affineTransform = AffineTransform.getRotateInstance(
-				Math.acos(Vec2.dot(orientationNormalized,
-						new Vec2(1, 0))), position.x,
-				position.y);
-		Polygon polygon = new Polygon();
-		PathIterator pathIterator = rectangle.getPathIterator(affineTransform);
-		while (!pathIterator.isDone()) {
-			double[] xy = new double[2];
-			pathIterator.currentSegment(xy);
-			polygon.addPoint((int) xy[0], (int) xy[1]);
-
-			pathIterator.next();
-		}
-
-		graphics.fillPolygon(polygon);
-		graphics.fillOval(position.x - size / 2, position.y - size / 2, size,
-				size);
-		graphics.fillRect(position.x - size / 2 + 1, position.y, size - 2,
-				size / 2);
+	public float getRadius() {
+		return .2f;
 	}
 
 	@Override
 	public Shape getGraphicShape() {
-		// TODO Auto-generated method stub
-		return null;
+		Point position = getGraphicPosition();
+		int height = Math.abs(Graphics.gameToGraphicY(.15f));
+		int width = Math.abs(Graphics.gameToGraphicX(.35f));
+
+		Area area = new Area(transformShape(new Rectangle(position.x,
+				position.y - height / 2, width, height)));
+
+		int radiusX = Math.abs(Graphics.gameToGraphicX(getRadius()));
+		int radiusY = Math.abs(Graphics.gameToGraphicY(getRadius()));
+		area.add(new Area(new Ellipse2D.Float(position.x - radiusX, position.y
+				- radiusY, radiusX * 2, radiusY * 2)));
+
+		radiusX *= 3f / 4;
+		radiusY -= 1;
+		area.add(new Area(new Rectangle(position.x - radiusX, position.y + 1,
+				radiusX * 2, radiusY)));
+		return area;
+	}
+
+	public void addBullet(Function<?, Bullet> bullet) {
+
 	}
 }

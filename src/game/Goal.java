@@ -1,8 +1,8 @@
 package game;
 
-import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Shape;
+import java.awt.geom.Ellipse2D;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -34,17 +34,22 @@ public class Goal extends GameElement {
 		return new Goal(body);
 	}
 
+	@Override
+	public String toString() {
+		return "Goal " + getPosition();
+	}
+
 	/**
 	 * Draw goal on graphics
 	 */
-	@Override
-	public void draw(Graphics2D graphics) {
-		Point position = getGraphicPosition();
-		System.out.println("Position Gx : " + position.x + " Position y : " + position.y);
-		graphics.fillRect(position.x , position.y, 20,
-				20);
-
-	}
+	/*
+	 * @Override public void draw(Graphics2D graphics) { Point position =
+	 * getGraphicPosition(); System.out.println("Position Gx : " + position.x +
+	 * " Position y : " + position.y); graphics.fillRect(position.x ,
+	 * position.y, 20, 20);
+	 * 
+	 * }
+	 */
 
 	/**
 	 * Receive a bullet.
@@ -79,7 +84,8 @@ public class Goal extends GameElement {
 	private static FixtureDef getFixtureDef() {
 		FixtureDef fixtureDef = new FixtureDef();
 		PolygonShape dynamicBox = new PolygonShape();
-		dynamicBox.setAsBox(1, 1);
+		dynamicBox.setRadius(.2f);
+		dynamicBox.setAsBox(.4f, .4f);
 		fixtureDef.shape = dynamicBox;
 		fixtureDef.density = 1;
 		fixtureDef.friction = 0.3f;
@@ -88,7 +94,9 @@ public class Goal extends GameElement {
 
 	@Override
 	public Shape getGraphicShape() {
-		// TODO Auto-generated method stub
-		return null;
+		Point position = getGraphicPosition();
+		float radius = Math.abs(Graphics.gameToGraphicY(getRadius()));
+		return new Ellipse2D.Float(position.x - radius, position.y - radius,
+				radius * 2, radius * 2);
 	}
 }

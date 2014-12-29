@@ -3,6 +3,7 @@ package game;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.util.Objects;
 
 import org.jbox2d.common.Vec2;
@@ -108,7 +109,24 @@ public abstract class GameElement {
 	 * @return radius of the element.
 	 */
 	public float getRadius() {
-		return body.getFixtureList().m_shape.m_radius;
+		try {
+			return body.getFixtureList().m_shape.m_radius;
+		} catch (NullPointerException e) {
+			return 0;
+		}
+	}
+
+	/**
+	 * Transform shape with element's data (rotation).
+	 * 
+	 * @param shape
+	 *            to transform.
+	 * @return new shape transformed.
+	 */
+	public Shape transformShape(Shape shape) {
+		Point position = getGraphicPosition();
+		return AffineTransform.getRotateInstance(body.getAngle(), position.x,
+				position.y).createTransformedShape(shape);
 	}
 
 	/**
@@ -116,5 +134,10 @@ public abstract class GameElement {
 	 * 
 	 * @param graphics
 	 */
-	public abstract void draw(Graphics2D graphics);
+	public void draw(Graphics2D graphics) {
+		Shape shape = getGraphicShape();
+		if (shape != null) {
+			graphics.fill(shape);
+		}
+	}
 }

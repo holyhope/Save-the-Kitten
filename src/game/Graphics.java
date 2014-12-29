@@ -2,10 +2,14 @@ package game;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.ConcurrentHashMap;
+
+import fr.umlv.zen3.ApplicationContext;
 
 public class Graphics {
 	/**
@@ -27,7 +31,15 @@ public class Graphics {
 	/**
 	 * Use for rounded position
 	 */
-	public static final long PRECISION = 100;
+	public static final long DEFINITION = 500;
+	/**
+	 * Time before clear exception text
+	 */
+	private static final long EXCEPTION_TIME = 1000;
+	/**
+	 * Store exception actually displayed into each context
+	 */
+	private static final ConcurrentHashMap<ApplicationContext, Throwable> exceptions = new ConcurrentHashMap<>();
 
 	/**
 	 * Write text centered on windows
@@ -81,8 +93,8 @@ public class Graphics {
 	 *            actual Round to paint
 	 */
 	public static void update(Graphics2D graphics2D, Round round) {
-		Dimension dimension = new Dimension(Math.round(PRECISION
-				* round.getWidth()), Math.round(PRECISION * round.getHeight()));
+		Dimension dimension = new Dimension(Math.round(DEFINITION
+				* round.getWidth()), Math.round(DEFINITION * round.getHeight()));
 		BufferedImage image = new BufferedImage(dimension.width,
 				dimension.height, BufferedImage.TYPE_INT_RGB);
 		Graphics2D graphics = image.createGraphics();
@@ -96,13 +108,19 @@ public class Graphics {
 		drawGrid(graphics, round);
 
 		graphics.setColor(Color.GREEN);
-		round.getLaunchers().stream().forEach(e -> e.draw(graphics));
+		for (GameElement element : round.getLaunchers()) {
+			element.draw(graphics);
+		}
 
 		graphics.setColor(Color.BLUE);
-		round.getGoals().stream().forEach(e -> e.draw(graphics));
+		for (GameElement element : round.getGoals()) {
+			element.draw(graphics);
+		}
 
-		graphics.setColor(Color.PINK);
-		round.getBullets().stream().forEach(e -> e.draw(graphics));
+		graphics.setColor(Color.BLACK);
+		for (GameElement element : round.getBullets()) {
+			element.draw(graphics);
+		}
 
 		graphics2D.drawImage(image, AffineTransform.getScaleInstance(WIDTH
 				/ dimension.getWidth(), HEIGHT / dimension.getHeight()), null);
@@ -114,10 +132,42 @@ public class Graphics {
 	 * @return
 	 */
 	public static int gameToGraphicY(float value) {
-		return -Math.round(value * PRECISION);
+		return -Math.round(value * DEFINITION);
 	}
 
 	public static int gameToGraphicX(float value) {
-		return Math.round(value * PRECISION);
+		return Math.round(value * DEFINITION);
+	}
+
+	public static void addException(ApplicationContext context, Throwable t) {
+		Throwable old = exceptions.put(context, t);
+		if (old != null) {
+			context.render(g -> {
+				hideException(g, old);
+			});
+		}
+		if (t != null) {
+			context.render(g -> {
+				displayException(g, t);
+			});
+		}
+	}
+
+	private static void hideException(Graphics2D g, Throwable t) {
+		int y = 10;
+		FontMetrics fontMetrics = g.getFontMetrics();
+		String message = t.getLocalizedMessage();
+		g.setBackground(BACKGROUND_COLOR);
+		g.clearRect(WIDTH - fontMetrics.stringWidth(message), y, WIDTH, y
+				+ fontMetrics.getHeight());
+	}
+
+	private static void displayException(Graphics2D g, Throwable t) {
+		int y = 10;
+		g.setColor(Color.RED);
+		g.setFont(new Font("Courier New", 0, 10));
+		FontMetrics fontMetrics = g.getFontMetrics();
+		String message = t.getLocalizedMessage();
+		g.drawString(message, WIDTH - fontMetrics.stringWidth(message), y);
 	}
 }

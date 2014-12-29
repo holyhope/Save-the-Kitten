@@ -29,7 +29,7 @@ public class GoalTest {
 	public void testReceive() {
 		World world = new World(new Vec2(0, 0));
 		Goal goal = Goal.create(world, new Vec2(2, 2));
-		Cat bullet = Cat.create(world, new Vec2(2, 2), new Vec2(0, 0));
+		Cat bullet = Cat.create(world, new Vec2(2, 2), new Vec2(0, 0), 1f);
 		assertTrue(goal.receive(bullet));
 		assertFalse(goal.receive(bullet));
 	}
@@ -45,14 +45,14 @@ public class GoalTest {
 	public void testReceiveParallelWorld() {
 		Goal goal = Goal.create(new World(new Vec2(0, 0)), new Vec2(2, 2));
 		goal.receive(Cat.create(new World(new Vec2(0, 0)), new Vec2(2, 2),
-				new Vec2(0, 0)));
+				new Vec2(0, 0), 1f));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testReceiveInvalidCat() {
 		Goal goal = Goal.create(new World(new Vec2(0, 0)), new Vec2(2, 2));
 		goal.receive(Cat.create(new World(new Vec2(0, 0)), new Vec2(2, 2),
-				new Vec2(0, 0)));
+				new Vec2(0, 0), 1f));
 	}
 
 	@Test
@@ -60,7 +60,7 @@ public class GoalTest {
 		World world = new World(new Vec2(0, 0));
 		Goal goal = Goal.create(world, new Vec2(2, 2));
 		assertFalse(goal.isFull());
-		goal.receive(Cat.create(world, new Vec2(2, 2), new Vec2(0, 0)));
+		goal.receive(Cat.create(world, new Vec2(2, 2), new Vec2(0, 0), 1f));
 		assertTrue(goal.isFull());
 	}
 
