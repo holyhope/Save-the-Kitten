@@ -6,10 +6,11 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.ConcurrentHashMap;
 
-import fr.umlv.zen3.ApplicationContext;
+import fr.umlv.zen4.ApplicationContext;
 
 public class Graphics {
 	/**
@@ -142,12 +143,20 @@ public class Graphics {
 	public static void addException(ApplicationContext context, Throwable t) {
 		Throwable old = exceptions.put(context, t);
 		if (old != null) {
-			context.render(g -> {
+			context.renderFrame((g, contentLost) -> {
+				if (contentLost) {  // we need to render the whole screen
+			          g.setColor(Color.BLACK);
+			          g.fill(new  Rectangle2D.Float(0, 0, Graphics.WIDTH+1, Graphics.HEIGHT+1));
+			    }
 				hideException(g, old);
 			});
 		}
 		if (t != null) {
-			context.render(g -> {
+			context.renderFrame((g, contentLost) -> {
+				if (contentLost) {  // we need to render the whole screen
+			          g.setColor(Color.BLACK);
+			          g.fill(new  Rectangle2D.Float(0, 0, Graphics.WIDTH+1, Graphics.HEIGHT+1));
+			    }
 				displayException(g, t);
 			});
 		}
