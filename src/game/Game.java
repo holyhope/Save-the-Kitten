@@ -46,12 +46,14 @@ public class Game {
 	 * @param context
 	 *            of the game
 	 */
-	public void waitForStart(ApplicationContext context) {
+	public void waitForStart(ApplicationContext context, Round round) {
 		KeyboardEvent key;
 		context.render(g -> {
 			g.setColor(Color.BLACK);
 			g.setBackground(Graphics.BACKGROUND_COLOR);
 			g.clearRect(0, 0, Graphics.WIDTH, Graphics.HEIGHT);
+			Graphics.drawGrid(g, 10);
+			round.draw(g);
 			Graphics.writeTextCentered(g, "Press Space to start the game");
 		});
 		while (true) {
@@ -71,7 +73,7 @@ public class Game {
 	 */
 	public void runApplication() {
 		Application
-				.run("Cat launcher",
+				.run("Save the kitten",
 						Graphics.WIDTH + 1,
 						Graphics.HEIGHT + 1,
 						context -> {
@@ -84,9 +86,9 @@ public class Game {
 								}
 							} while (roundTmp == null);
 
-							waitForStart(context);
-
 							final Round round = roundTmp;
+
+							waitForStart(context, round);
 
 							new Thread(() -> {
 								round.start();
@@ -96,15 +98,26 @@ public class Game {
 							while (!round.isVictory() && !round.isDefeat()) {
 								if (System.currentTimeMillis() - previous > Graphics.REFRESH_TIME) {
 									context.render(g -> {
+										g.setBackground(Graphics.BACKGROUND_COLOR);
 										Graphics.update(g, round);
 									});
 									previous = System.currentTimeMillis();
+									try {
+										Thread.sleep(Graphics.REFRESH_TIME);
+									} catch (Exception e) {
+										Graphics.addException(
+												context,
+												new IllegalMonitorStateException(
+														"Impossible de mettre en pause le processus d'affichage"));
+									}
 								} else {
 									try {
 										Thread.sleep(1);
 									} catch (Exception e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
+										Graphics.addException(
+												context,
+												new IllegalMonitorStateException(
+														"Impossible de mettre en pause le processus d'affichage"));
 									}
 								}
 							}
@@ -123,6 +136,7 @@ public class Game {
 	 */
 	private void EndRound(Round round, ApplicationContext context) {
 		context.render(g -> {
+			g.setBackground(Graphics.BACKGROUND_COLOR);
 			Graphics.update(g, round);
 			g.setFont(new Font("Helvetica", Font.CENTER_BASELINE, 20));
 			if (round.isVictory()) {
@@ -132,7 +146,6 @@ public class Game {
 				g.setColor(Color.RED);
 				Graphics.writeTextCentered(g, "Defeat !");
 			}
-			g.dispose();
 		});
 		System.out.println("end.");
 	}

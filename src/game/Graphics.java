@@ -72,15 +72,20 @@ public class Graphics {
 				y - fontMetrics.getHeight() / 2);
 	}
 
-	private static void drawGrid(Graphics2D graphics, Round round) {
-		int graphicWidth = gameToGraphicX(round.getWidth());
-		int graphicHeight = gameToGraphicY(round.getHeight());
-		int graphicValue;
-		for (float i = 0; i < round.getWidth(); i = i + 0.1f) {
-			graphicValue = gameToGraphicX(i);
-			graphics.drawLine(graphicValue, 0, graphicValue, graphicHeight);
-			graphicValue = gameToGraphicY(i);
-			graphics.drawLine(0, graphicValue, graphicWidth, graphicValue);
+	/**
+	 * Draw grid on each step pixel.
+	 * 
+	 * @param graphics
+	 *            to draw in.
+	 * @param step
+	 *            between two line.
+	 */
+	public static void drawGrid(Graphics2D graphics, float step) {
+		graphics.setColor(Color.LIGHT_GRAY);
+		for (float i = 0; i < Graphics.WIDTH; i = i + step) {
+			int v = Math.round(i);
+			graphics.drawLine(v, 0, v, Graphics.HEIGHT);
+			graphics.drawLine(0, v, Graphics.WIDTH, v);
 		}
 	}
 
@@ -96,16 +101,15 @@ public class Graphics {
 		Dimension dimension = new Dimension(Math.round(DEFINITION
 				* round.getWidth()), Math.round(DEFINITION * round.getHeight()));
 		BufferedImage image = new BufferedImage(dimension.width,
-				dimension.height, BufferedImage.TYPE_INT_RGB);
+				dimension.height, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D graphics = image.createGraphics();
-
-		graphics.setBackground(Graphics.BACKGROUND_COLOR);
+		graphics.setBackground(graphics2D.getBackground());
 		graphics.clearRect(0, 0, image.getWidth(), image.getHeight());
 
 		graphics.translate(0, dimension.getHeight());
 
-		graphics.setColor(Color.LIGHT_GRAY);
-		drawGrid(graphics, round);
+		drawGrid(graphics, 10);
+		round.draw(graphics);
 
 		graphics.setColor(Color.GREEN);
 		for (GameElement element : round.getLaunchers()) {

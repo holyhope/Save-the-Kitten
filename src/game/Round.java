@@ -1,5 +1,6 @@
 package game;
 
+import java.awt.Graphics2D;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -155,6 +156,16 @@ public class Round {
 	}
 
 	/**
+	 * Draw area and walls.
+	 * 
+	 * @param graphic
+	 *            to draw in.
+	 */
+	public void draw(Graphics2D graphic) {
+		// TODO Dessiner le terrain
+	}
+
+	/**
 	 * Check if position is in area
 	 * 
 	 * @param position
@@ -223,15 +234,10 @@ public class Round {
 	/**
 	 * Make current thread waiting for the end of the round.
 	 */
-	public void waitForEnd() {
+	public void waitForEnd() throws InterruptedException {
 		synchronized (endLock) {
 			while (!isVictory() && !isDefeat()) {
-				try {
-					endLock.wait();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				endLock.wait();
 			}
 		}
 	}
