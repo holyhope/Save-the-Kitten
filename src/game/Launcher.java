@@ -131,14 +131,12 @@ public class Launcher extends GameElement {
 	 * @return Set of bullets which will be launched
 	 */
 	public Set<Bullet> launch() {
-		ConcurrentLinkedQueue<Bullet> bullets = new ConcurrentLinkedQueue<Bullet>();
-		bullets.addAll(this.bullets);
 		final LinkedHashSet<Bullet> set = new LinkedHashSet<>();
 		set.addAll(bullets);
+		bullets.removeAll(set);
 
 		new Thread(() -> {
-			Bullet bullet;
-			while ((bullet = bullets.poll()) != null) {
+			for(Bullet bullet: set) {
 				if (stop) {
 					return;
 				}
