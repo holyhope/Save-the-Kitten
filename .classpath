@@ -8,10 +8,9 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/Projet/jbox2d-library-2.2.1.1-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="zen3.jar" sourcepath="zen3.jar"/>
-	<classpathentry kind="lib" path="zen4.jar" sourcepath="/home/maxime/Téléchargements/zen4/src.zip">
+	<classpathentry kind="lib" path="zen4.jar" sourcepath="src.zip">
 		<attributes>
-			<attribute name="javadoc_location" value="jar:file:/home/maxime/Téléchargements/zen4/src.zip!/"/>
+			<attribute name="javadoc_location" value="jar:platform:/resource/Projet-Java-M1/src.zip!/"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="output" path="bin"/>

@@ -5,22 +5,27 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.ConcurrentHashMap;
 
 import fr.umlv.zen4.ApplicationContext;
+import fr.umlv.zen4.ScreenInfo;
 
 public class Graphics {
 	/**
 	 * Width of the panel
 	 */
-	public static final int WIDTH = 800;
+	public static final ThreadLocal<Integer> WIDTH = new ThreadLocal<Integer>();
 	/**
 	 * Height of the panel
 	 */
-	public static final int HEIGHT = 800;
+	public static final ThreadLocal<Integer> HEIGHT = new ThreadLocal<Integer>();
+	/**
+	 * Top left corner of the panel in the window
+	 */
+	public static final ThreadLocal<Point> topLeft = new ThreadLocal<Point>();
 	/**
 	 * Background color of the panel
 	 */
@@ -51,7 +56,7 @@ public class Graphics {
 	 *            text to paint
 	 */
 	public static void writeTextCentered(Graphics2D g, String string) {
-		writeTextCentered(g, string, WIDTH / 2, HEIGHT / 2);
+		writeTextCentered(g, string, WIDTH.get() / 2, HEIGHT.get() / 2);
 	}
 
 	/**
@@ -69,6 +74,9 @@ public class Graphics {
 	public static void writeTextCentered(Graphics2D graphics2D, String string,
 			int x, int y) {
 		FontMetrics fontMetrics = graphics2D.getFontMetrics();
+		Point topLeft = Graphics.topLeft.get();
+		graphics2D.setTransform(AffineTransform.getTranslateInstance(
+				topLeft.getX(), topLeft.getY()));
 		graphics2D.drawString(string, x - fontMetrics.stringWidth(string) / 2,
 				y - fontMetrics.getHeight() / 2);
 	}
@@ -123,60 +131,108 @@ public class Graphics {
 			element.draw(graphics);
 		}
 
-		graphics2D.drawImage(image, AffineTransform.getScaleInstance(WIDTH
-				/ dimension.getWidth(), HEIGHT / dimension.getHeight()), null);
+		Point topLeft = Graphics.topLeft.get();
+		graphics2D.setTransform(AffineTransform.getTranslateInstance(
+				topLeft.getX(), topLeft.getY()));
+		graphics2D.drawImage(
+				image,
+				AffineTransform.getScaleInstance(
+						WIDTH.get() / dimension.getWidth(), HEIGHT.get()
+								/ dimension.getHeight()), null);
 	}
 
 	/**
+	 * Convert value from jbox2d to zen4
 	 * 
 	 * @param value
-	 * @return
+	 *            from jbox2d
+	 * @return new value
 	 */
 	public static int gameToGraphicY(float value) {
 		return -Math.round(value * DEFINITION);
 	}
 
+	/**
+	 * Convert value from jbox2d to zen4
+	 * 
+	 * @param value
+	 *            from jbox2d
+	 * @return new value
+	 */
 	public static int gameToGraphicX(float value) {
 		return Math.round(value * DEFINITION);
 	}
 
-	public static void addException(ApplicationContext context, Throwable t) {
-		Throwable old = exceptions.put(context, t);
+	/**
+	 * Display exception error message in context
+	 * 
+	 * @param context
+	 *            to display the error
+	 * @param exception
+	 *            to report
+	 */
+	public static void addException(ApplicationContext context,
+			Throwable exception) {
+		Throwable old = exceptions.put(context, exception);
 		if (old != null) {
 			context.renderFrame((g, contentLost) -> {
-				if (contentLost) {  // we need to render the whole screen
-			          g.setColor(Color.BLACK);
-			          g.fill(new  Rectangle2D.Float(0, 0, Graphics.WIDTH+1, Graphics.HEIGHT+1));
-			    }
 				hideException(g, old);
 			});
 		}
-		if (t != null) {
+		if (exception != null) {
 			context.renderFrame((g, contentLost) -> {
-				if (contentLost) {  // we need to render the whole screen
-			          g.setColor(Color.BLACK);
-			          g.fill(new  Rectangle2D.Float(0, 0, Graphics.WIDTH+1, Graphics.HEIGHT+1));
-			    }
-				displayException(g, t);
+				displayException(g, exception);
 			});
 		}
 	}
 
-	private static void hideException(Graphics2D g, Throwable t) {
+	private static void hideException(Graphics2D g, Throwable exception) {
 		int y = 10;
 		FontMetrics fontMetrics = g.getFontMetrics();
-		String message = t.getLocalizedMessage();
+		String message = exception.getLocalizedMessage();
 		g.setBackground(BACKGROUND_COLOR);
-		g.clearRect(WIDTH - fontMetrics.stringWidth(message), y, WIDTH, y
-				+ fontMetrics.getHeight());
+		g.clearRect(WIDTH.get() - fontMetrics.stringWidth(message), y,
+				WIDTH.get(), y + fontMetrics.getHeight());
 	}
 
-	private static void displayException(Graphics2D g, Throwable t) {
+	private static void displayException(Graphics2D g, Throwable exception) {
 		int y = 10;
 		g.setColor(Color.RED);
 		g.setFont(new Font("Courier New", 0, 10));
 		FontMetrics fontMetrics = g.getFontMetrics();
-		String message = t.getLocalizedMessage();
-		g.drawString(message, WIDTH - fontMetrics.stringWidth(message), y);
+		String message = exception.getLocalizedMessage();
+		g.drawString(message, WIDTH.get() - fontMetrics.stringWidth(message), y);
+	}
+
+	/**
+	 * Fill background and draw area.
+	 * 
+	 * @param graphics2D
+	 *            to draw in.
+	 */
+	public static void drawBackground(Graphics2D graphics2D) {
+		graphics2D.setColor(Color.BLACK);
+		graphics2D.fillRect(0, 0, Graphics.WIDTH.get(), Graphics.HEIGHT.get());
+		graphics2D.setBackground(BACKGROUND_COLOR);
+		Point topLeft = Graphics.topLeft.get();
+		graphics2D.setTransform(AffineTransform.getTranslateInstance(
+				topLeft.getX(), topLeft.getY()));
+		graphics2D.clearRect(0, 0, WIDTH.get(), HEIGHT.get());
+	}
+
+	/**
+	 * Initialize all parameters
+	 * 
+	 * @param context
+	 *            of the application
+	 */
+	public static void init(ApplicationContext context) {
+		ScreenInfo screenInfo = context.getScreenInfo();
+		int width = Math.round(screenInfo.getWidth());
+		int height = Math.round(screenInfo.getHeight());
+		int min = Math.min(width, height);
+		WIDTH.set(min);
+		HEIGHT.set(min);
+		topLeft.set(new Point((width - min) / 2, (height - min) / 2));
 	}
 }
