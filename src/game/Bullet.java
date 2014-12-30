@@ -65,9 +65,11 @@ public abstract class Bullet extends GameElement {
 	@Override
 	public Shape getGraphicShape() {
 		Point position = getGraphicPosition();
-		int radius = Math.abs(Graphics.gameToGraphicX(getRadius()));
-		return new Ellipse2D.Float(position.x - radius, position.y - radius,
-				radius * 2, radius * 2);
+		float radius = getRadius();
+		int radiusX = Math.abs(Graphics.gameToGraphicX(radius));
+		int radiusY = Math.abs(Graphics.gameToGraphicY(radius));
+		return new Ellipse2D.Float(position.x - radiusX, position.y - radiusY,
+				radiusX * 2, radiusY * 2);
 	}
 
 	/**

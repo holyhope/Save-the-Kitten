@@ -2,6 +2,7 @@ package game;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -378,14 +379,22 @@ public class Round {
 				try {
 					body.getFixtureList().getAABB(0).getVertices(vertices);
 
-					float x = vertices[0].x;
-					float y = vertices[0].y;
-					float width = Math.abs(vertices[2].x - x);
-					float height = Math.abs(vertices[2].y - y);
-					graphics2D.fillRect(Graphics.gameToGraphicX(x),
-							Graphics.gameToGraphicY(y),
-							Math.abs(Graphics.gameToGraphicX(width)),
-							Math.abs(Graphics.gameToGraphicX(height)));
+					int x = Arrays.asList(vertices).stream()
+							.map(v -> Graphics.gameToGraphicX(v.x)).distinct()
+							.reduce(Integer.MAX_VALUE, Math::min);
+					int y = Arrays.asList(vertices).stream()
+							.map(v -> Graphics.gameToGraphicY(v.y)).distinct()
+							.reduce(Integer.MAX_VALUE, Math::min);
+					int width = Math.abs(Arrays.asList(vertices).stream()
+							.map(v -> Graphics.gameToGraphicX(v.x)).distinct()
+							.reduce(Integer.MIN_VALUE, Math::max)
+							- x);
+					int height = Math.abs(Arrays.asList(vertices).stream()
+							.map(v -> Graphics.gameToGraphicY(v.y)).distinct()
+							.reduce(Integer.MIN_VALUE, Math::max)
+							- y);
+
+					graphics2D.fillRect(x, y, width, height);
 				} catch (Throwable t) {
 					Graphics.addException(t);
 				}
