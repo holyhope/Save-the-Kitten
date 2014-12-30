@@ -115,19 +115,21 @@ public class Game {
 		int halfSeparatorSize = separatorSize / 2;
 		int doubleHeight = height * 2;
 
+		graphics2D.setBackground(Graphics.BACKGROUND_COLOR);
 		for (int i = 0; i < halfRoundDisplayed; i++) {
 			int x = Graphics.LEFT_PIXEL.get() + i * width;
 			int y = Graphics.TOP_PIXEL.get();
 			try {
-				Graphics.update(graphics2D, rounds.get(deltaPage + i), x, y,
-						width, height);
+				Round round = rounds.get(deltaPage + i);
+				graphics2D.clearRect(x, y, width, height);
+				Graphics.update(graphics2D, round, x, y, width, height);
 			} catch (Exception e) {
 
 			}
 			try {
-				Graphics.update(graphics2D,
-						rounds.get(deltaPage + i + halfRoundDisplayed), x, y,
-						width, height);
+				Round round = rounds.get(deltaPage + i + halfRoundDisplayed);
+				graphics2D.clearRect(x, y, width, height);
+				Graphics.update(graphics2D, round, x, y, width, height);
 			} catch (Exception e) {
 
 			}
