@@ -76,7 +76,7 @@ public class Game {
 		round.add(launcher);
 		round.add(Goal.create(world, new Vec2(3, 3)));
 		round.add(Goal.create(world, new Vec2(2, 3)));
-		round.createWall(2.4f, 1.5f, .2f, 2f);
+		round.createWall(2.4f, 1.5f, 1.2f, 1f);
 		return round;
 	}
 
