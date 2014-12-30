@@ -12,10 +12,8 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.World;
-
 
 import fr.umlv.zen4.Application;
 import fr.umlv.zen4.ApplicationContext;
@@ -392,11 +390,9 @@ public class Game {
 								roundTmp = getRound(context);
 							} catch (IllegalStateException e) {
 								Graphics.addException(e);
-								e.printStackTrace();
 								try {
 									Thread.sleep(1000);
 								} catch (Exception e1) {
-									e1.printStackTrace();
 								}
 								context.exit(1);
 								return;
@@ -405,16 +401,33 @@ public class Game {
 
 							waitForStart(context, round);
 
-							new Thread(() -> {
+							Thread thread = new Thread(() -> {
 								round.start();
-							}).start();
-
+							});
+							thread.setUncaughtExceptionHandler((t, e) -> t
+									.setName(e.getLocalizedMessage()));
+							thread.setName("moteur 3D");
 							context.renderFrame((g, contentLost) -> {
 								Graphics.drawBackground(g);
 							});
 
+							thread.start();
+
 							long previous = System.currentTimeMillis();
 							while (!round.isVictory() && !round.isDefeat()) {
+								if (!thread.isAlive()) {
+									Graphics.addException(new Exception(thread
+											.getName()));
+									context.renderFrame((g, contentLost) -> {
+										Graphics.drawBackground(g);
+									});
+									try {
+										Thread.sleep(3000);
+									} catch (Exception e) {
+									}
+									context.exit(2);
+									return;
+								}
 								if (System.currentTimeMillis() - previous > Graphics.REFRESH_TIME) {
 									context.renderFrame((g, contentLost) -> {
 										Graphics.drawBackground(g);

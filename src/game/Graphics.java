@@ -58,7 +58,7 @@ public class Graphics {
 	/**
 	 * Store exception actually displayed into each context
 	 */
-	private static final ThreadLocal<Throwable> exceptions = new ThreadLocal<>();
+	private static final ThreadLocal<Throwable> exception = new ThreadLocal<>();
 	/**
 	 * Store exception actually displayed into each context
 	 */
@@ -224,7 +224,7 @@ public class Graphics {
 	 */
 	public static void addException(Throwable exception) {
 		exception.printStackTrace();
-		exceptions.set(exception);
+		Graphics.exception.set(exception);
 		exceptionsTime.set(System.currentTimeMillis());
 	}
 
@@ -240,12 +240,12 @@ public class Graphics {
 		final int marginX = 10;
 		final int marginY = 10;
 
-		Throwable exception = exceptions.get();
+		Throwable exception = Graphics.exception.get();
 		if (exception == null) {
 			return;
 		}
 		if (System.currentTimeMillis() - exceptionsTime.get() > EXCEPTION_TIME) {
-			exceptions.set(null);
+			Graphics.exception.set(null);
 			return;
 		}
 		graphics2D.setFont(new Font("Courier New", Font.BOLD, 12));

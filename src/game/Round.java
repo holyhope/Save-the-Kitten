@@ -216,11 +216,7 @@ public class Round {
 	 * Calculation of a new step
 	 */
 	private void update() {
-		try {
-			world.step(timeStep, velocityIterations, positionIterations);
-		} catch (Exception e) {
-			// TODO
-		}
+		world.step(timeStep, velocityIterations, positionIterations);
 	}
 
 	/**
@@ -228,7 +224,7 @@ public class Round {
 	 */
 	public void start() {
 		if (started.getAndSet(true)) {
-			throw new IllegalStateException("Le round a d�j� d�marr�");
+			throw new IllegalStateException("Round already started.");
 		}
 		startLaunch();
 		bombs.stream().forEach(Bomb::startTimer);
@@ -246,16 +242,13 @@ public class Round {
 
 	/**
 	 * Make current thread waiting for the end of the round.
+	 * 
+	 * @throws InterruptedException
 	 */
-	public void waitForEnd() {
+	public void waitForEnd() throws InterruptedException {
 		synchronized (endLock) {
 			while (!isVictory() && !isDefeat()) {
-				try {
-					endLock.wait();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				endLock.wait();
 			}
 		}
 	}
