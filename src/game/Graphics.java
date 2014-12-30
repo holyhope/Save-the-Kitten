@@ -42,7 +42,7 @@ public class Graphics {
 	/**
 	 * Use for rounded position
 	 */
-	public static final long DEFINITION = 500;
+	public static final long DEFINITION = 200;
 	/**
 	 * Time before clear exception text
 	 */
@@ -164,6 +164,10 @@ public class Graphics {
 
 		graphics.setColor(Color.BLACK);
 		for (GameElement element : round.getBullets()) {
+			element.draw(graphics);
+		}
+		graphics.setColor(Color.RED);
+		for (GameElement element : round.getBombs()) {
 			element.draw(graphics);
 		}
 

@@ -30,6 +30,8 @@ public class Round {
 	 * List of launchers
 	 */
 	private final LinkedHashSet<Launcher> launchers = new LinkedHashSet<>();
+	
+	private final LinkedHashSet<Bomb> bombs = new LinkedHashSet<>();
 	/**
 	 * Width of the area
 	 */
@@ -145,6 +147,15 @@ public class Round {
 	public Set<Launcher> getLaunchers() {
 		return Collections.unmodifiableSet(launchers);
 	}
+	
+	/**
+	 * Get collections of all bombs
+	 * 
+	 * @return unmodifiable set of bombs
+	 */
+	public Set<Bomb> getBombs() {
+		return Collections.unmodifiableSet(bombs);
+	}
 
 	/**
 	 * Get collections of all bullet
@@ -216,15 +227,17 @@ public class Round {
 	 */
 	public void start() {
 		if (started.getAndSet(true)) {
-			throw new IllegalStateException("Le round a déjà démarré");
+			throw new IllegalStateException("Le round a dï¿½jï¿½ dï¿½marrï¿½");
 		}
 		startLaunch();
+		bombs.stream().forEach(Bomb::startTimer);
 
 		do {
 			update();
 		} while (!isVictory() && !isDefeat());
 
 		stopLaunch();
+		bombs.stream().forEach(Bomb::stopTimer);
 		synchronized (endLock) {
 			endLock.notifyAll();
 		}
@@ -268,7 +281,7 @@ public class Round {
 	 */
 	public void add(Goal goal) {
 		if (isStarted()) {
-			throw new IllegalStateException("Le round a déjà démarré");
+			throw new IllegalStateException("Le round a dï¿½jï¿½ dï¿½marrï¿½");
 		}
 		Objects.requireNonNull(goal);
 		if (!isInArea(goal.getPosition())) {
@@ -297,7 +310,7 @@ public class Round {
 	 */
 	public void add(Launcher launcher) {
 		if (isStarted()) {
-			throw new IllegalStateException("Le round a déjà démarré");
+			throw new IllegalStateException("Le round a dï¿½jï¿½ dï¿½marrï¿½");
 		}
 		Objects.requireNonNull(launcher);
 		if (!isInArea(launcher.getPosition())) {
@@ -307,6 +320,26 @@ public class Round {
 			throw new IllegalStateException("Launcher is not in the world.");
 		}
 		launchers.add(launcher);
+	}
+	
+	/**
+	 * Add a bomb to the round
+	 * 
+	 * @param bomb
+	 *            to add
+	 */
+	public void add(Bomb bomb) {
+		if (isStarted()) {
+			throw new IllegalStateException("Le round a dï¿½jï¿½ dï¿½marrï¿½");
+		}
+		Objects.requireNonNull(bomb);
+		if (!isInArea(bomb.getPosition())) {
+			throw new IllegalArgumentException("Bomb must be in board.");
+		}
+		if (!bomb.isInWorld(world)) {
+			throw new IllegalStateException("Bomb is not in the world.");
+		}
+		bombs.add(bomb);
 	}
 
 	/**

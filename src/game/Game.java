@@ -9,8 +9,12 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+
+
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.World;
+
+
 
 import fr.umlv.zen4.Application;
 import fr.umlv.zen4.ApplicationContext;
@@ -49,11 +53,15 @@ public class Game {
 		World world = new World(new Vec2(0, 0));
 		Round round = Round.create(world, 5f, 5f);
 		Launcher launcher = Launcher.create(world, new Vec2(3, 2), 1, new Vec2(
-				0.001f, -0.001f));
+				-0.001f, 0.001f));
 		launcher.addBullet(Cat.class);
 		round.add(launcher);
-		round.add(Goal.create(world, new Vec2(3, 3)));
-		round.add(Goal.create(world, new Vec2(2, 3)));
+		round.add(Goal.create(world, new Vec2(0, 3)));
+		//round.add(Goal.create(world, new Vec2(2, 3)));
+		Bomb bomb1 = Bomb.create(world, new Vec2(2,4));
+		bomb1.setTimer(300);
+		round.add(bomb1);
+		
 		return round;
 	}
 
@@ -63,7 +71,7 @@ public class Game {
 		World world = new World(new Vec2(0, 0));
 		Round round = Round.create(world, 5f, 5f);
 		Launcher launcher = Launcher.create(world, new Vec2(2, 2), 1, new Vec2(
-				0.001f, 0.001f));
+				0.001f, -0.001f));
 		launcher.addBullet(Cat.class);
 		round.add(launcher);
 		round.add(Goal.create(world, new Vec2(3, 3)));
