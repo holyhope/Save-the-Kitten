@@ -1,5 +1,7 @@
 package game;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -59,6 +61,10 @@ public class Round {
 	 */
 	private static final Set<World> worldsAttached = Collections
 			.synchronizedSet(new HashSet<>());
+	/**
+	 * Color of the wall in Graphics2D.
+	 */
+	private static final Color WALL_COLOR = new Color(50, 50, 50);
 
 	private Round(World world, float width, float height) {
 		if (width <= 0 || height <= 0) {
@@ -87,6 +93,10 @@ public class Round {
 		worldsAttached.remove(world);
 	}
 
+	public World getWorld() {
+		return world;
+	}
+
 	/**
 	 * Create a wall in the world
 	 * 
@@ -99,12 +109,12 @@ public class Round {
 	 * @param height
 	 *            of the wall
 	 */
-	private void createWall(float x, float y, float width, float height) {
+	public void createWall(float x, float y, float width, float height) {
 		BodyDef wallDef = new BodyDef();
-		wallDef.position.set(x, y);
+		wallDef.position.set(x + width / 2, y + height / 2);
 		Body wallBody = world.createBody(wallDef);
 		PolygonShape wallBox = new PolygonShape();
-		wallBox.setAsBox(width, height);
+		wallBox.setAsBox(width / 2, height / 2);
 		Fixture fixture = wallBody.createFixture(wallBox, 0);
 		Filter filter = new Filter();
 		filter.categoryBits = 0x0001;
@@ -116,15 +126,15 @@ public class Round {
 	 * Create 4 walls around the area of the round
 	 */
 	private void createWalls() {
-		float wallSize = 0.9f;
+		float wallSize = 1f;
 		// Bottom Wall
-		createWall(width / 2, -wallSize, width / 2 + wallSize, wallSize);
+		createWall(-wallSize, -wallSize, width + wallSize * 2, wallSize);
 		// Top wall
-		createWall(width / 2, height + wallSize, width / 2 + wallSize, wallSize);
+		createWall(-wallSize, height + wallSize, width + wallSize * 2, wallSize);
 		// Left wall
-		createWall(-wallSize, height / 2, wallSize, height / 2);
+		createWall(-wallSize, 0, wallSize, height);
 		// Right wall
-		createWall(width + wallSize, height / 2, wallSize, height / 2);
+		createWall(width, 0, wallSize, height);
 	}
 
 	/**
@@ -315,5 +325,39 @@ public class Round {
 	 */
 	public float getHeight() {
 		return height;
+	}
+
+	/**
+	 * Draw walls in area.
+	 * 
+	 * @param graphics
+	 *            to draw in
+	 */
+	public void draw(Graphics2D graphics2D) {
+		Vec2 vertices[] = new Vec2[4];
+		for (int i = 0; i < vertices.length; i++) {
+			vertices[i] = new Vec2();
+		}
+		graphics2D.setColor(WALL_COLOR);
+		Body body = world.getBodyList();
+		while (body != null) {
+			if (body.getUserData() == null) {
+				try {
+					body.getFixtureList().getAABB(0).getVertices(vertices);
+
+					float x = vertices[0].x;
+					float y = vertices[0].y;
+					float width = Math.abs(vertices[2].x - x);
+					float height = Math.abs(vertices[2].y - y);
+					 graphics2D.fillRect(Graphics.gameToGraphicX(x),
+							Graphics.gameToGraphicY(y),
+							Math.abs(Graphics.gameToGraphicX(width)),
+							Math.abs(Graphics.gameToGraphicX(height)));
+				} catch (Throwable t) {
+					Graphics.addException(t);
+				}
+			}
+			body = body.getNext();
+		}
 	}
 }

@@ -10,7 +10,7 @@ import org.jbox2d.dynamics.World;
 
 public class Main {
 	public static void main(String[] args) {
-		Game game = new Game();
+		Game game = Game.create();
 		game.runApplication();
 	}
 

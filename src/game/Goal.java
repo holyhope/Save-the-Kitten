@@ -95,8 +95,10 @@ public class Goal extends GameElement {
 	@Override
 	public Shape getGraphicShape() {
 		Point position = getGraphicPosition();
-		float radius = Math.abs(Graphics.gameToGraphicY(getRadius()));
-		return new Ellipse2D.Float(position.x - radius, position.y - radius,
-				radius * 2, radius * 2);
+		float radius = getRadius();
+		int radiusX = Math.abs(Graphics.gameToGraphicX(radius));
+		int radiusY = Math.abs(Graphics.gameToGraphicY(radius));
+		return new Ellipse2D.Float(position.x - radiusX, position.y - radiusY,
+				radiusX * 2, radiusY * 2);
 	}
 }

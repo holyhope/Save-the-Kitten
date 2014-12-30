@@ -5,12 +5,13 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Objects;
 
 import fr.umlv.zen4.ApplicationContext;
+import fr.umlv.zen4.MotionEvent;
+import fr.umlv.zen4.MotionEvent.Action;
 import fr.umlv.zen4.ScreenInfo;
 
 public class Graphics {
@@ -23,9 +24,13 @@ public class Graphics {
 	 */
 	public static final ThreadLocal<Integer> HEIGHT = new ThreadLocal<Integer>();
 	/**
-	 * Top left corner of the panel in the window
+	 * First left pixel of the panel in the window
 	 */
-	public static final ThreadLocal<Point> topLeft = new ThreadLocal<Point>();
+	public static final ThreadLocal<Integer> LEFT_PIXEL = new ThreadLocal<Integer>();
+	/**
+	 * First top pixel of the panel in the window
+	 */
+	public static final ThreadLocal<Integer> TOP_PIXEL = new ThreadLocal<Integer>();
 	/**
 	 * Background color of the panel
 	 */
@@ -45,7 +50,7 @@ public class Graphics {
 	/**
 	 * Store exception actually displayed into each context
 	 */
-	private static final ConcurrentHashMap<ApplicationContext, Throwable> exceptions = new ConcurrentHashMap<>();
+	private static final ThreadLocal<Throwable> exceptions = new ThreadLocal<>();
 
 	/**
 	 * Write text centered on windows
@@ -74,27 +79,37 @@ public class Graphics {
 	public static void writeTextCentered(Graphics2D graphics2D, String string,
 			int x, int y) {
 		FontMetrics fontMetrics = graphics2D.getFontMetrics();
-		Point topLeft = Graphics.topLeft.get();
 		graphics2D.setTransform(AffineTransform.getTranslateInstance(
-				topLeft.getX(), topLeft.getY()));
+				LEFT_PIXEL.get(), TOP_PIXEL.get()));
 		graphics2D.drawString(string, x - fontMetrics.stringWidth(string) / 2,
 				y - fontMetrics.getHeight() / 2);
 	}
 
-	private static void drawGrid(Graphics2D graphics, Round round) {
-		int graphicWidth = gameToGraphicX(round.getWidth());
-		int graphicHeight = gameToGraphicY(round.getHeight());
-		int graphicValue;
-		for (float i = 0; i < round.getWidth(); i = i + 0.1f) {
-			graphicValue = gameToGraphicX(i);
-			graphics.drawLine(graphicValue, 0, graphicValue, graphicHeight);
-			graphicValue = gameToGraphicY(i);
-			graphics.drawLine(0, graphicValue, graphicWidth, graphicValue);
+	/**
+	 * Draw grid on each step pixel.
+	 * 
+	 * @param graphics
+	 *            to draw in.
+	 * @param step
+	 *            between two line.
+	 * @param j
+	 * @param height2
+	 * @param width2
+	 * @param y
+	 */
+	public static void drawGrid(Graphics2D graphics, int x, int y, int width,
+			int height, int step) {
+		graphics.setColor(Color.LIGHT_GRAY);
+		for (int i = x; i < x + width; i += step) {
+			graphics.drawLine(i, y, i, y + height);
+		}
+		for (int i = y; i < y + height; i += step) {
+			graphics.drawLine(x, i, x + width, i);
 		}
 	}
 
 	/**
-	 * Show round into graphics2D
+	 * Show round into full window
 	 * 
 	 * @param graphics2D
 	 *            where to paint round
@@ -102,19 +117,40 @@ public class Graphics {
 	 *            actual Round to paint
 	 */
 	public static void update(Graphics2D graphics2D, Round round) {
+		update(graphics2D, round, LEFT_PIXEL.get(), TOP_PIXEL.get(),
+				WIDTH.get(), HEIGHT.get());
+	}
+
+	/**
+	 * 
+	 * Show round into area defined by (x,y,width,height).
+	 * 
+	 * @param graphics2D
+	 *            where to paint round
+	 * @param round
+	 *            actual Round to paint
+	 * @param x
+	 *            first left pixel coordinate.
+	 * @param y
+	 *            first top pixel coordinate.
+	 * @param width
+	 *            of the area.
+	 * @param height
+	 *            of the area.
+	 */
+	public static void update(Graphics2D graphics2D, Round round, int x, int y,
+			int width, int height) {
 		Dimension dimension = new Dimension(Math.round(DEFINITION
 				* round.getWidth()), Math.round(DEFINITION * round.getHeight()));
 		BufferedImage image = new BufferedImage(dimension.width,
-				dimension.height, BufferedImage.TYPE_INT_RGB);
+				dimension.height, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D graphics = image.createGraphics();
-
-		graphics.setBackground(Graphics.BACKGROUND_COLOR);
-		graphics.clearRect(0, 0, image.getWidth(), image.getHeight());
 
 		graphics.translate(0, dimension.getHeight());
 
-		graphics.setColor(Color.LIGHT_GRAY);
-		drawGrid(graphics, round);
+		graphics.setColor(Color.DARK_GRAY);
+
+		round.draw(graphics);
 
 		graphics.setColor(Color.GREEN);
 		for (GameElement element : round.getLaunchers()) {
@@ -131,14 +167,15 @@ public class Graphics {
 			element.draw(graphics);
 		}
 
-		Point topLeft = Graphics.topLeft.get();
-		graphics2D.setTransform(AffineTransform.getTranslateInstance(
-				topLeft.getX(), topLeft.getY()));
-		graphics2D.drawImage(
-				image,
-				AffineTransform.getScaleInstance(
-						WIDTH.get() / dimension.getWidth(), HEIGHT.get()
-								/ dimension.getHeight()), null);
+		/*
+		graphics2D.setBackground(Graphics.BACKGROUND_COLOR);
+		graphics2D.clearRect(x, y, width, height);
+		drawGrid(graphics2D, x, y, width, height, 15);
+		*/
+		graphics2D.setTransform(AffineTransform.getTranslateInstance(x, y));
+		graphics2D.drawImage(image, AffineTransform.getScaleInstance(width
+				/ dimension.getWidth(), height / dimension.getHeight()), null);
+		graphics2D.setTransform(AffineTransform.getTranslateInstance(0, 0));
 	}
 
 	/**
@@ -166,42 +203,26 @@ public class Graphics {
 	/**
 	 * Display exception error message in context
 	 * 
-	 * @param context
-	 *            to display the error
 	 * @param exception
 	 *            to report
 	 */
-	public static void addException(ApplicationContext context,
-			Throwable exception) {
-		Throwable old = exceptions.put(context, exception);
-		if (old != null) {
-			context.renderFrame((g, contentLost) -> {
-				hideException(g, old);
-			});
-		}
-		if (exception != null) {
-			context.renderFrame((g, contentLost) -> {
-				displayException(g, exception);
-			});
-		}
+	public static void addException(Throwable exception) {
+		exception.printStackTrace();
+		exceptions.set(exception);
 	}
 
-	private static void hideException(Graphics2D g, Throwable exception) {
+	public static void displayException(Graphics2D graphics2D) {
 		int y = 10;
-		FontMetrics fontMetrics = g.getFontMetrics();
+		Throwable exception = exceptions.get();
+		if (exception == null) {
+			return;
+		}
+		graphics2D.setColor(Color.RED);
+		graphics2D.setFont(new Font("Courier New", 0, 12));
+		FontMetrics fontMetrics = graphics2D.getFontMetrics();
 		String message = exception.getLocalizedMessage();
-		g.setBackground(BACKGROUND_COLOR);
-		g.clearRect(WIDTH.get() - fontMetrics.stringWidth(message), y,
-				WIDTH.get(), y + fontMetrics.getHeight());
-	}
-
-	private static void displayException(Graphics2D g, Throwable exception) {
-		int y = 10;
-		g.setColor(Color.RED);
-		g.setFont(new Font("Courier New", 0, 10));
-		FontMetrics fontMetrics = g.getFontMetrics();
-		String message = exception.getLocalizedMessage();
-		g.drawString(message, WIDTH.get() - fontMetrics.stringWidth(message), y);
+		graphics2D.drawString(message,
+				WIDTH.get() - fontMetrics.stringWidth(message), y);
 	}
 
 	/**
@@ -214,10 +235,10 @@ public class Graphics {
 		graphics2D.setColor(Color.BLACK);
 		graphics2D.fillRect(0, 0, Graphics.WIDTH.get(), Graphics.HEIGHT.get());
 		graphics2D.setBackground(BACKGROUND_COLOR);
-		Point topLeft = Graphics.topLeft.get();
 		graphics2D.setTransform(AffineTransform.getTranslateInstance(
-				topLeft.getX(), topLeft.getY()));
+				LEFT_PIXEL.get(), TOP_PIXEL.get()));
 		graphics2D.clearRect(0, 0, WIDTH.get(), HEIGHT.get());
+		displayException(graphics2D);
 	}
 
 	/**
@@ -233,6 +254,33 @@ public class Graphics {
 		int min = Math.min(width, height);
 		WIDTH.set(min);
 		HEIGHT.set(min);
-		topLeft.set(new Point((width - min) / 2, (height - min) / 2));
+		LEFT_PIXEL.set((width - min) / 2);
+		TOP_PIXEL.set((height - min) / 2);
+	}
+
+	/**
+	 * Check if user left click in area defined by (x,y,width,height).
+	 * 
+	 * @param context
+	 *            of the application.
+	 * @param event
+	 *            of the mouse.
+	 * @param x
+	 *            of the top left corner of the area.
+	 * @param y
+	 *            of the top left corner of the area.
+	 * @param width
+	 *            of the area.
+	 * @param height
+	 *            of the area.
+	 * @return
+	 */
+	public static boolean click(ApplicationContext context, MotionEvent event,
+			int x, int y, int width, int height) {
+		float mouseX = event.getX();
+		float mouseY = event.getY();
+		return Action.DOWN.equals(Objects.requireNonNull(event).getAction())
+				&& x <= mouseX && mouseX < x + width && y <= mouseY
+				&& mouseY < y + height;
 	}
 }
