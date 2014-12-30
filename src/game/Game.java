@@ -12,8 +12,10 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.World;
+
 
 import fr.umlv.zen4.Application;
 import fr.umlv.zen4.ApplicationContext;
@@ -459,7 +461,6 @@ public class Game {
 				g.setColor(Color.RED);
 				Graphics.writeTextCentered(g, "Defeat !");
 			}
-			g.dispose();
 		});
 	}
 }

@@ -54,11 +54,15 @@ public class Graphics {
 	/**
 	 * Time before clear exception text
 	 */
-	private static final long EXCEPTION_TIME = 1000;
+	private static final long EXCEPTION_TIME = 2000;
 	/**
 	 * Store exception actually displayed into each context
 	 */
 	private static final ThreadLocal<Throwable> exceptions = new ThreadLocal<>();
+	/**
+	 * Store exception actually displayed into each context
+	 */
+	private static final ThreadLocal<Long> exceptionsTime = new ThreadLocal<>();
 
 	/**
 	 * Write text centered on windows
@@ -72,7 +76,6 @@ public class Graphics {
 		writeTextCentered(g, string, WIDTH.get() / 2, HEIGHT.get() / 2);
 	}
 
-	
 	/**
 	 * Write text centered on (x;y)
 	 * 
@@ -222,20 +225,50 @@ public class Graphics {
 	public static void addException(Throwable exception) {
 		exception.printStackTrace();
 		exceptions.set(exception);
+		exceptionsTime.set(System.currentTimeMillis());
 	}
 
+	/**
+	 * Display last exception.
+	 * 
+	 * @param graphics2D
+	 *            to draw in.
+	 */
 	public static void displayException(Graphics2D graphics2D) {
-		int y = 10;
+		final int paddingX = 4;
+		final int paddingY = 3;
+		final int marginX = 10;
+		final int marginY = 10;
+
 		Throwable exception = exceptions.get();
 		if (exception == null) {
 			return;
 		}
-		graphics2D.setColor(Color.RED);
-		graphics2D.setFont(new Font("Courier New", 0, 12));
+		if (System.currentTimeMillis() - exceptionsTime.get() > EXCEPTION_TIME) {
+			exceptions.set(null);
+			return;
+		}
+		graphics2D.setFont(new Font("Courier New", Font.BOLD, 12));
 		FontMetrics fontMetrics = graphics2D.getFontMetrics();
 		String message = exception.getLocalizedMessage();
-		graphics2D.drawString(message,
-				WIDTH.get() - fontMetrics.stringWidth(message), y);
+		int width = fontMetrics.stringWidth(message);
+		int height = fontMetrics.getHeight();
+		int x;
+		int y;
+		if (REAL_WIDTH.get() > REAL_HEIGHT.get()) {
+			x = WIDTH.get() + marginX;
+			y = HEIGHT.get() - height - marginY;
+		} else {
+			x = LEFT_PIXEL.get() + marginX;
+			y = TOP_PIXEL.get() + HEIGHT.get() + marginY;
+		}
+		graphics2D.setColor(new Color(255, 255, 255, 128));
+		graphics2D.fillRect(x - paddingX * 2, y - paddingY, width + paddingX
+				* 2, height + paddingY * 2);
+		graphics2D.setColor(Color.RED);
+		graphics2D.drawRect(x - paddingX * 2, y - paddingY, width + paddingX
+				* 2, height + paddingY * 2);
+		graphics2D.drawString(message, x - paddingX, y + height);
 	}
 
 	/**
