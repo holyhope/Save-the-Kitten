@@ -32,6 +32,14 @@ public class Graphics {
 	 */
 	public static final ThreadLocal<Integer> TOP_PIXEL = new ThreadLocal<Integer>();
 	/**
+	 * Width of the window
+	 */
+	private static final ThreadLocal<Integer> REAL_WIDTH = new ThreadLocal<Integer>();
+	/**
+	 * Height of the window
+	 */
+	private static final ThreadLocal<Integer> REAL_HEIGHT = new ThreadLocal<Integer>();
+	/**
 	 * Background color of the panel
 	 */
 	public static final Color BACKGROUND_COLOR = Color.WHITE;
@@ -168,10 +176,10 @@ public class Graphics {
 		}
 
 		/*
-		graphics2D.setBackground(Graphics.BACKGROUND_COLOR);
-		graphics2D.clearRect(x, y, width, height);
-		drawGrid(graphics2D, x, y, width, height, 15);
-		*/
+		 * graphics2D.setBackground(Graphics.BACKGROUND_COLOR);
+		 * graphics2D.clearRect(x, y, width, height); drawGrid(graphics2D, x, y,
+		 * width, height, 15);
+		 */
 		graphics2D.setTransform(AffineTransform.getTranslateInstance(x, y));
 		graphics2D.drawImage(image, AffineTransform.getScaleInstance(width
 				/ dimension.getWidth(), height / dimension.getHeight()), null);
@@ -233,7 +241,8 @@ public class Graphics {
 	 */
 	public static void drawBackground(Graphics2D graphics2D) {
 		graphics2D.setColor(Color.BLACK);
-		graphics2D.fillRect(0, 0, Graphics.WIDTH.get(), Graphics.HEIGHT.get());
+		graphics2D.fillRect(0, 0, Graphics.REAL_WIDTH.get(),
+				Graphics.REAL_HEIGHT.get());
 		graphics2D.setBackground(BACKGROUND_COLOR);
 		graphics2D.setTransform(AffineTransform.getTranslateInstance(
 				LEFT_PIXEL.get(), TOP_PIXEL.get()));
@@ -252,6 +261,8 @@ public class Graphics {
 		int width = Math.round(screenInfo.getWidth());
 		int height = Math.round(screenInfo.getHeight());
 		int min = Math.min(width, height);
+		REAL_WIDTH.set(width);
+		REAL_HEIGHT.set(height);
 		WIDTH.set(min);
 		HEIGHT.set(min);
 		LEFT_PIXEL.set((width - min) / 2);

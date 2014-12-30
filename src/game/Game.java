@@ -3,6 +3,9 @@ package game;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Polygon;
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -106,7 +109,18 @@ public class Game {
 		rounds.add(Objects.requireNonNull(round));
 	}
 
+	/**
+	 * Draw round selector for getRound()
+	 * 
+	 * @param graphics2D
+	 *            to draw in
+	 * @param page
+	 *            displayed
+	 */
 	private void drawRoundSelector(Graphics2D graphics2D, int page) {
+		final int arrowSpace = 20;
+		final int arrowSize = 30;
+
 		int deltaPage = page * ROUNDS_DISPLAYED;
 		int width = (Graphics.WIDTH.get() * 2) / ROUNDS_DISPLAYED;
 		int height = Graphics.HEIGHT.get() / 2;
@@ -143,6 +157,47 @@ public class Game {
 		graphics2D.fillRect(Graphics.LEFT_PIXEL.get(), Graphics.TOP_PIXEL.get()
 				+ height - halfSeparatorSize, Graphics.WIDTH.get(),
 				separatorSize);
+		graphics2D.setColor(Color.WHITE);
+		graphics2D.setFont(new Font("Verdana", 0, 15));
+		graphics2D.drawString("page " + (1 + page) + "/"
+				+ (1 + rounds.size() / ROUNDS_DISPLAYED), 10, 15);
+		Shape arrow = new Polygon();
+		((Polygon) arrow).addPoint(0, 0);
+		((Polygon) arrow).addPoint(arrowSize, arrowSize / 2);
+		((Polygon) arrow).addPoint(0, arrowSize);
+
+		// Right arrow
+		graphics2D.setTransform(AffineTransform.getTranslateInstance(
+				Graphics.LEFT_PIXEL.get() + Graphics.WIDTH.get() + arrowSpace,
+				Graphics.TOP_PIXEL.get() + (Graphics.HEIGHT.get() - arrowSize)
+						/ 2));
+		graphics2D.fill(arrow);
+
+		// Left arrow
+		arrow = AffineTransform.getRotateInstance(Math.PI, 0, arrowSize / 2)
+				.createTransformedShape(arrow);
+		graphics2D.setTransform(AffineTransform.getTranslateInstance(
+				Graphics.LEFT_PIXEL.get() - arrowSpace,
+				Graphics.TOP_PIXEL.get() + (Graphics.HEIGHT.get() - arrowSize)
+						/ 2));
+		graphics2D.fill(arrow);
+
+		// Top arrow
+		arrow = AffineTransform
+				.getRotateInstance(Math.PI / 2, 0, arrowSize / 2)
+				.createTransformedShape(arrow);
+		graphics2D.setTransform(AffineTransform.getTranslateInstance(
+				Graphics.LEFT_PIXEL.get() + (Graphics.WIDTH.get() - arrowSize)
+						/ 2, Graphics.TOP_PIXEL.get() - arrowSpace));
+		graphics2D.fill(arrow);
+
+		// Bottom arrow
+		arrow = AffineTransform.getRotateInstance(Math.PI, 0, arrowSize / 2)
+				.createTransformedShape(arrow);
+		graphics2D.setTransform(AffineTransform.getTranslateInstance(
+				Graphics.LEFT_PIXEL.get() + (Graphics.WIDTH.get() - arrowSize)
+						/ 2, Graphics.TOP_PIXEL.get() + Graphics.HEIGHT.get() + arrowSize));
+		graphics2D.fill(arrow);
 	}
 
 	/**
@@ -153,6 +208,7 @@ public class Game {
 	 * @return new Round chosen by user.
 	 */
 	private Round getRound(ApplicationContext context) {
+		final long waitBetweenClick = 100;
 		if (rounds.isEmpty()) {
 			throw new IllegalStateException("No round to select");
 		}
@@ -162,10 +218,19 @@ public class Game {
 		int halfRoundDisplayed = ROUNDS_DISPLAYED / 2;
 
 		int page = 0;
-		context.renderFrame((g, contentLost) -> {
-			drawRoundSelector(g, page);
-		});
+		boolean pageChanged = true;
+		long lastPageChanged = System.currentTimeMillis();
 		for (;;) {
+			if (pageChanged) {
+				pageChanged = false;
+				final int ActualPage = page;
+				context.renderFrame((g, contentLost) -> {
+					g.setColor(Color.BLACK);
+					g.fillRect(0, 0, Graphics.WIDTH.get(),
+							Graphics.HEIGHT.get());
+					drawRoundSelector(g, ActualPage);
+				});
+			}
 			try {
 				MotionEvent event = context.waitAndBlockUntilAMotion();
 				int deltaPage = page * ROUNDS_DISPLAYED;
@@ -183,6 +248,52 @@ public class Game {
 							return rounds.get(deltaPage + i
 									+ halfRoundDisplayed);
 						} catch (IndexOutOfBoundsException e) {
+						}
+					} else if (System.currentTimeMillis() - lastPageChanged > waitBetweenClick) {
+						if (Graphics
+								.click(context,
+										event,
+										Graphics.LEFT_PIXEL.get()
+												+ Graphics.WIDTH.get(),
+										Graphics.TOP_PIXEL.get(),
+										Integer.MAX_VALUE
+												- (Graphics.LEFT_PIXEL.get() + Graphics.WIDTH
+														.get()),
+										Graphics.HEIGHT.get())
+								|| Graphics
+										.click(context,
+												event,
+												Graphics.LEFT_PIXEL.get(),
+												Graphics.TOP_PIXEL.get()
+														+ Graphics.HEIGHT.get(),
+												Graphics.WIDTH.get(),
+												Integer.MAX_VALUE
+														- (Graphics.TOP_PIXEL
+																.get() + Graphics.HEIGHT
+																.get()))) {
+							if (page < Math.floor(rounds.size()
+									/ ROUNDS_DISPLAYED)) {
+								page++;
+								pageChanged = true;
+							}
+							lastPageChanged = System.currentTimeMillis();
+						} else if (Graphics.click(
+								context,
+								event,
+								0,
+								0,
+								Graphics.LEFT_PIXEL.get(),
+								Graphics.TOP_PIXEL.get()
+										+ Graphics.HEIGHT.get())
+								|| Graphics.click(context, event, 0, 0,
+										Graphics.LEFT_PIXEL.get()
+												+ Graphics.WIDTH.get(),
+										Graphics.TOP_PIXEL.get())) {
+							if (page > 1) {
+								page--;
+								pageChanged = true;
+							}
+							lastPageChanged = System.currentTimeMillis();
 						}
 					}
 				}
