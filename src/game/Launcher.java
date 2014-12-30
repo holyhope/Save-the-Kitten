@@ -136,7 +136,7 @@ public class Launcher extends GameElement {
 		bullets.removeAll(set);
 
 		new Thread(() -> {
-			for(Bullet bullet: set) {
+			for (Bullet bullet : set) {
 				if (stop) {
 					return;
 				}

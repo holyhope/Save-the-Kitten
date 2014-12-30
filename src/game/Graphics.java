@@ -72,6 +72,7 @@ public class Graphics {
 		writeTextCentered(g, string, WIDTH.get() / 2, HEIGHT.get() / 2);
 	}
 
+	
 	/**
 	 * Write text centered on (x;y)
 	 * 

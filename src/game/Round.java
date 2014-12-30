@@ -30,7 +30,7 @@ public class Round {
 	 * List of launchers
 	 */
 	private final LinkedHashSet<Launcher> launchers = new LinkedHashSet<>();
-	
+
 	private final LinkedHashSet<Bomb> bombs = new LinkedHashSet<>();
 	/**
 	 * Width of the area
@@ -147,7 +147,7 @@ public class Round {
 	public Set<Launcher> getLaunchers() {
 		return Collections.unmodifiableSet(launchers);
 	}
-	
+
 	/**
 	 * Get collections of all bombs
 	 * 
@@ -321,7 +321,7 @@ public class Round {
 		}
 		launchers.add(launcher);
 	}
-	
+
 	/**
 	 * Add a bomb to the round
 	 * 
@@ -382,7 +382,7 @@ public class Round {
 					float y = vertices[0].y;
 					float width = Math.abs(vertices[2].x - x);
 					float height = Math.abs(vertices[2].y - y);
-					 graphics2D.fillRect(Graphics.gameToGraphicX(x),
+					graphics2D.fillRect(Graphics.gameToGraphicX(x),
 							Graphics.gameToGraphicY(y),
 							Math.abs(Graphics.gameToGraphicX(width)),
 							Math.abs(Graphics.gameToGraphicX(height)));

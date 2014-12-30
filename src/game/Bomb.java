@@ -131,7 +131,7 @@ public class Bomb extends GameElement {
 		Body body = world.createBody(bodyDef);
 		return new Bomb(body);
 	}
-	
+
 	private static FixtureDef getFixtureDef() {
 		FixtureDef fixtureDef = new FixtureDef();
 		PolygonShape dynamicBox = new PolygonShape();
@@ -145,9 +145,8 @@ public class Bomb extends GameElement {
 
 	@Override
 	public Shape getGraphicShape() {
-		if(hasExplosed.get()){
-			return new Ellipse2D.Float(0, 0,
-					0, 0);
+		if (hasExplosed.get()) {
+			return new Ellipse2D.Float(0, 0, 0, 0);
 		}
 		Point position = getGraphicPosition();
 		float radius = getRadius();
