@@ -115,6 +115,11 @@ public class Game {
 							EndRound(round, context);
 
 							System.out.println("end.");
+							try {
+								Thread.sleep(3000);
+							} catch (Exception e) {
+								Graphics.addException(context, e);
+							}
 							context.exit(0);
 						});
 	}
