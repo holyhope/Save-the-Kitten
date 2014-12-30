@@ -29,6 +29,11 @@ public class Game {
 	private Game() {
 	}
 
+	/**
+	 * Create a game and initialize default rounds.
+	 * 
+	 * @return new Game
+	 */
 	public static Game create() {
 		Game game = new Game();
 		game.rounds.addAll(Arrays.asList(defaultRounds).stream()
@@ -105,6 +110,12 @@ public class Game {
 		defaultRounds[index] = round;
 	}
 
+	/**
+	 * Add round to Game. User can select it thanks to the round selector.
+	 * 
+	 * @param round
+	 *            to add
+	 */
 	public void addRound(Round round) {
 		rounds.add(Objects.requireNonNull(round));
 	}
@@ -118,9 +129,6 @@ public class Game {
 	 *            displayed
 	 */
 	private void drawRoundSelector(Graphics2D graphics2D, int page) {
-		final int arrowSpace = 20;
-		final int arrowSize = 30;
-
 		int deltaPage = page * ROUNDS_DISPLAYED;
 		int width = (Graphics.WIDTH.get() * 2) / ROUNDS_DISPLAYED;
 		int height = Graphics.HEIGHT.get() / 2;
@@ -157,47 +165,79 @@ public class Game {
 		graphics2D.fillRect(Graphics.LEFT_PIXEL.get(), Graphics.TOP_PIXEL.get()
 				+ height - halfSeparatorSize, Graphics.WIDTH.get(),
 				separatorSize);
+		drawRoundSelectorCurrentPage(graphics2D, page);
+		drawRoundSelectorArrows(graphics2D, page > 1,
+				page < Math.floor(rounds.size() / ROUNDS_DISPLAYED));
+	}
+
+	/**
+	 * Draw page number in window
+	 * 
+	 * @param graphics2D
+	 *            to draw in
+	 * @param page
+	 *            number to display
+	 */
+	private void drawRoundSelectorCurrentPage(Graphics2D graphics2D, int page) {
 		graphics2D.setColor(Color.WHITE);
 		graphics2D.setFont(new Font("Verdana", 0, 15));
 		graphics2D.drawString("page " + (1 + page) + "/"
 				+ (1 + rounds.size() / ROUNDS_DISPLAYED), 10, 15);
+	}
+
+	/**
+	 * Draw arrow to navigate.
+	 * 
+	 * @param graphics2D
+	 *            to draw in
+	 * @param previous
+	 *            must be true to display previous arrows.
+	 * @param next
+	 *            must be true to display next arrows.
+	 */
+	private void drawRoundSelectorArrows(Graphics2D graphics2D,
+			boolean previous, boolean next) {
+		final int arrowSpace = 20;
+		final int arrowSize = 30;
 		Shape arrow = new Polygon();
 		((Polygon) arrow).addPoint(0, 0);
 		((Polygon) arrow).addPoint(arrowSize, arrowSize / 2);
 		((Polygon) arrow).addPoint(0, arrowSize);
 
-		// Right arrow
-		graphics2D.setTransform(AffineTransform.getTranslateInstance(
-				Graphics.LEFT_PIXEL.get() + Graphics.WIDTH.get() + arrowSpace,
-				Graphics.TOP_PIXEL.get() + (Graphics.HEIGHT.get() - arrowSize)
-						/ 2));
-		graphics2D.fill(arrow);
+		if (next) {
+			// Right arrow
+			graphics2D.setTransform(AffineTransform.getTranslateInstance(
+					Graphics.LEFT_PIXEL.get() + Graphics.WIDTH.get()
+							+ arrowSpace, Graphics.TOP_PIXEL.get()
+							+ (Graphics.HEIGHT.get() - arrowSize) / 2));
+			graphics2D.fill(arrow);
+			// Bottom arrow
+			graphics2D.setTransform(AffineTransform.getTranslateInstance(
+					Graphics.LEFT_PIXEL.get()
+							+ (Graphics.WIDTH.get() - arrowSize) / 2,
+					Graphics.TOP_PIXEL.get() + Graphics.HEIGHT.get()
+							+ arrowSize));
+			graphics2D.fill(AffineTransform.getRotateInstance(Math.PI / 2, 0,
+					arrowSize / 2).createTransformedShape(arrow));
+		}
 
-		// Left arrow
-		arrow = AffineTransform.getRotateInstance(Math.PI, 0, arrowSize / 2)
-				.createTransformedShape(arrow);
-		graphics2D.setTransform(AffineTransform.getTranslateInstance(
-				Graphics.LEFT_PIXEL.get() - arrowSpace,
-				Graphics.TOP_PIXEL.get() + (Graphics.HEIGHT.get() - arrowSize)
-						/ 2));
-		graphics2D.fill(arrow);
+		if (previous) {
+			// Left arrow
+			graphics2D.setTransform(AffineTransform.getTranslateInstance(
+					Graphics.LEFT_PIXEL.get() - arrowSpace,
+					Graphics.TOP_PIXEL.get()
+							+ (Graphics.HEIGHT.get() - arrowSize) / 2));
+			graphics2D.fill(AffineTransform.getRotateInstance(Math.PI, 0,
+					arrowSize / 2).createTransformedShape(arrow));
+			// Top arrow
+			graphics2D.setTransform(AffineTransform.getTranslateInstance(
+					Graphics.LEFT_PIXEL.get()
+							+ (Graphics.WIDTH.get() - arrowSize) / 2,
+					Graphics.TOP_PIXEL.get() - arrowSpace));
+			graphics2D.fill(AffineTransform.getRotateInstance(-Math.PI / 2, 0,
+					arrowSize / 2).createTransformedShape(arrow));
+		}
 
-		// Top arrow
-		arrow = AffineTransform
-				.getRotateInstance(Math.PI / 2, 0, arrowSize / 2)
-				.createTransformedShape(arrow);
-		graphics2D.setTransform(AffineTransform.getTranslateInstance(
-				Graphics.LEFT_PIXEL.get() + (Graphics.WIDTH.get() - arrowSize)
-						/ 2, Graphics.TOP_PIXEL.get() - arrowSpace));
-		graphics2D.fill(arrow);
-
-		// Bottom arrow
-		arrow = AffineTransform.getRotateInstance(Math.PI, 0, arrowSize / 2)
-				.createTransformedShape(arrow);
-		graphics2D.setTransform(AffineTransform.getTranslateInstance(
-				Graphics.LEFT_PIXEL.get() + (Graphics.WIDTH.get() - arrowSize)
-						/ 2, Graphics.TOP_PIXEL.get() + Graphics.HEIGHT.get() + arrowSize));
-		graphics2D.fill(arrow);
 	}
 
 	/**
