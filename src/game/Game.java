@@ -3,6 +3,7 @@ package game;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
@@ -62,9 +63,7 @@ public class Game {
 		round.add(launcher);
 		round.add(Goal.create(world, new Vec2(0, 3)));
 		// round.add(Goal.create(world, new Vec2(2, 3)));
-		Bomb bomb1 = Bomb.create(world, new Vec2(2, 4));
-		bomb1.setTimer(300);
-		round.add(bomb1);
+		round.add(Bomb.class);
 
 		return round;
 	}
@@ -81,6 +80,8 @@ public class Game {
 		round.add(Goal.create(world, new Vec2(3, 3)));
 		round.add(Goal.create(world, new Vec2(2, 3)));
 		round.createWall(2.4f, 1.5f, 1.2f, 1f);
+		round.add(Bomb.class);
+		round.add(Bomb.class);
 		return round;
 	}
 
@@ -347,6 +348,27 @@ public class Game {
 		}
 	}
 
+	private Bomb plantBomb(Round round, MotionEvent event)
+			throws IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException, NoSuchMethodException, SecurityException {
+		Point pos = new Point(Math.round(event.getX()),
+				Math.round(event.getY()));
+		Vec2 position = new Vec2(Graphics.graphicXToGame(pos.x),
+				Graphics.graphicYToGame(pos.y));
+		return round.plantNextBomb(position);
+	}
+
+	private int nextTimer(int timer) {
+		final int precision = 1000;
+		final int maxTimer = 3000;
+		return timer % maxTimer + precision;
+	}
+
+	private int resetTimer() {
+		final int precision = 1000;
+		return precision;
+	}
+
 	/**
 	 * Interact with user before start the round.
 	 * 
@@ -354,21 +376,62 @@ public class Game {
 	 *            of the game
 	 * @param round
 	 *            chosen
+	 * @throws SecurityException
+	 * @throws NoSuchMethodException
+	 * @throws InvocationTargetException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
 	 */
-	public void waitForStart(ApplicationContext context, Round round) {
-		MotionEvent event;
+	public void waitForStart(ApplicationContext context, Round round)
+			throws IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException, NoSuchMethodException, SecurityException {
+
+		int timer = resetTimer();
+		Bomb bomb = null;
+		while (round.canPlantBomb()) {
+			context.renderFrame((g, contentLost) -> {
+				Graphics.drawBackground(g);
+				Graphics.update(g, round);
+			});
+			try {
+				MotionEvent event;
+				for (;;) {
+					event = context.waitAndBlockUntilAMotion();
+					if (Graphics.click(context, event,
+							Graphics.LEFT_PIXEL.get(),
+							Graphics.TOP_PIXEL.get(), Graphics.WIDTH.get(),
+							Graphics.HEIGHT.get())) {
+						break;
+					}
+				}
+				if (bomb != null) {
+					// Check to change timer
+					if (Graphics.clickOnGameElement(context, event, bomb)) {
+						timer = nextTimer(timer);
+					} else {
+						bomb = plantBomb(round, event);
+					}
+				} else {
+					bomb = plantBomb(round, event);
+					timer = resetTimer();
+				}
+				bomb.setTimer(timer);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+		}
 		context.renderFrame((g, contentLost) -> {
 			Graphics.drawBackground(g);
 			Graphics.writeTextCentered(g, "Click to start the game");
 		});
 		for (;;) {
 			try {
-				event = context.waitAndBlockUntilAMotion();
+				if (Action.UP.equals(context.waitAndBlockUntilAMotion()
+						.getAction())) {
+					break;
+				}
 			} catch (InterruptedException e) {
 				throw new AssertionError(e);
-			}
-			if (event.getAction().equals(Action.UP)) {
-				break;
 			}
 		}
 		context.renderFrame((g, contentLost) -> {
@@ -399,7 +462,20 @@ public class Game {
 							}
 							final Round round = roundTmp;
 
-							waitForStart(context, round);
+							try {
+								waitForStart(context, round);
+							} catch (Exception e) {
+								Graphics.addException(e);
+								context.renderFrame((g, contentLost) -> {
+									Graphics.drawBackground(g);
+								});
+								try {
+									Thread.sleep(3000);
+								} catch (Exception e1) {
+								}
+								context.exit(2);
+								return;
+							}
 
 							Thread thread = new Thread(() -> {
 								round.start();
@@ -425,7 +501,7 @@ public class Game {
 										Thread.sleep(3000);
 									} catch (Exception e) {
 									}
-									context.exit(2);
+									context.exit(3);
 									return;
 								}
 								if (System.currentTimeMillis() - previous > Graphics.REFRESH_TIME) {

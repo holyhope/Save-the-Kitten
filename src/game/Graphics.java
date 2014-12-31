@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.Objects;
@@ -164,7 +165,7 @@ public class Graphics {
 
 		round.draw(graphics);
 
-		graphics.setColor(Color.GREEN);
+		graphics.setColor(Color.PINK);
 		for (GameElement element : round.getLaunchers()) {
 			element.draw(graphics);
 		}
@@ -214,6 +215,28 @@ public class Graphics {
 	 */
 	public static int gameToGraphicX(float value) {
 		return Math.round(value * DEFINITION);
+	}
+
+	/**
+	 * Convert value from zen4 to jbox2d
+	 * 
+	 * @param value
+	 *            from zen4
+	 * @return new value
+	 */
+	public static float graphicYToGame(int value) {
+		return ((float) value - TOP_PIXEL.get()) / DEFINITION;
+	}
+
+	/**
+	 * Convert value from zen4 to jbox2d
+	 * 
+	 * @param value
+	 *            from zen4
+	 * @return new value
+	 */
+	public static float graphicXToGame(int value) {
+		return ((float) value - LEFT_PIXEL.get()) / DEFINITION;
 	}
 
 	/**
@@ -322,7 +345,7 @@ public class Graphics {
 	 *            of the area.
 	 * @param height
 	 *            of the area.
-	 * @return
+	 * @return True if user clicked in area.
 	 */
 	public static boolean click(ApplicationContext context, MotionEvent event,
 			int x, int y, int width, int height) {
@@ -331,5 +354,28 @@ public class Graphics {
 		return Action.DOWN.equals(Objects.requireNonNull(event).getAction())
 				&& x <= mouseX && mouseX < x + width && y <= mouseY
 				&& mouseY < y + height;
+	}
+
+	/**
+	 * Check if user left click in area represented by gameElement.
+	 * 
+	 * @param context
+	 *            of the application
+	 * @param event
+	 *            of the mouse
+	 * @param gameElement
+	 *            to check
+	 * @return True if user clicked on gameElement.
+	 */
+	public static boolean clickOnGameElement(ApplicationContext context,
+			MotionEvent event, GameElement gameElement) {
+		Point position = Objects.requireNonNull(gameElement)
+				.getGraphicPosition();
+		int radiusX = Math
+				.abs(Graphics.gameToGraphicX(gameElement.getRadius()));
+		int radiusY = Math
+				.abs(Graphics.gameToGraphicY(gameElement.getRadius()));
+		return Graphics.click(context, event, position.x - radiusX, position.y
+				- radiusY, radiusX * 2, radiusY * 2);
 	}
 }

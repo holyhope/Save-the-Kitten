@@ -1,11 +1,17 @@
 package game;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Ellipse2D;
+import java.lang.reflect.Method;
 import java.util.ArrayDeque;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.Timer;
@@ -36,6 +42,10 @@ public class Bomb extends GameElement {
 	 * Timer of the bomb
 	 */
 	private Timer timer = null;
+	/**
+	 * Initial timer defined with setTimer().
+	 */
+	private int InitialTimer;
 
 	/**
 	 * Check if Bomb has already exploded
@@ -56,8 +66,8 @@ public class Bomb extends GameElement {
 		body.createFixture(getFixtureDef());
 	}
 
-	public void setTimer(int millisecond) {
-		if (millisecond <= 0) {
+	public void setTimer(int timer) {
+		if (timer <= 0) {
 			throw new IllegalArgumentException("millisecond <= 0");
 		}
 		// Création d'une instance de listener
@@ -69,7 +79,8 @@ public class Bomb extends GameElement {
 			}
 		};
 
-		timer = new Timer(millisecond, action);
+		this.timer = new Timer(timer, action);
+		InitialTimer = timer;
 	}
 
 	public void startTimer() {
@@ -123,12 +134,13 @@ public class Bomb extends GameElement {
 		}
 	}
 
-	public static Bomb create(World world, Vec2 vec2) {
+	public static Bomb create(World world, Vec2 position) {
 		BodyDef bodyDef = new BodyDef();
-		bodyDef.position.set(vec2.x, vec2.y);
+		Objects.requireNonNull(position);
+		bodyDef.position.set(position.x, position.y);
 		bodyDef.type = BodyType.STATIC;
 		bodyDef.awake = true;
-		Body body = world.createBody(bodyDef);
+		Body body = Objects.requireNonNull(world).createBody(bodyDef);
 		return new Bomb(body);
 	}
 
@@ -156,4 +168,44 @@ public class Bomb extends GameElement {
 				radiusX * 2, radiusY * 2);
 	}
 
+	@Override
+	public void draw(Graphics2D graphics) {
+		Color color = graphics.getColor();
+		Font font = graphics.getFont();
+		float delay = this.timer.getDelay();
+		graphics.setColor(new Color((InitialTimer - Math.round(delay)) * 255
+				/ InitialTimer, Math.round(delay) * 255 / InitialTimer, 100));
+		super.draw(graphics);
+		Point position = getGraphicPosition();
+		FontMetrics fontMetrics = graphics.getFontMetrics();
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append(delay / 1000);
+		graphics.setColor(Color.YELLOW);
+		graphics.setFont(new Font(font.getName(), Font.BOLD, 12));
+		String string = stringBuilder.toString();
+		graphics.drawString(string,
+				position.x - fontMetrics.stringWidth(string) / 2, position.y
+						- fontMetrics.getHeight() / 2);
+		graphics.setFont(font);
+		graphics.setColor(color);
+	}
+
+	/**
+	 * 
+	 * @param classValue
+	 * @return
+	 * @throws NoSuchMethodException
+	 * @throws SecurityException
+	 * @throws IllegalAccessException
+	 */
+	public static Method getConstructor(Class<? extends Bomb> classValue)
+			throws NoSuchMethodException, SecurityException,
+			IllegalAccessException {
+		Method method = classValue.getDeclaredMethod("create", World.class,
+				Vec2.class);
+		if (Bullet.class.isInstance(method.getReturnType())) {
+			throw new IllegalAccessException();
+		}
+		return method;
+	}
 }

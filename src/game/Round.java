@@ -2,12 +2,14 @@ package game;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -20,29 +22,35 @@ import org.jbox2d.dynamics.World;
 
 public class Round {
 	/**
-	 * List of Goals
+	 * List of Goals.
 	 */
 	private final LinkedHashSet<Goal> goals = new LinkedHashSet<>();
 	/**
-	 * List of Bullets
+	 * List of Bullets.
 	 */
 	private final LinkedHashSet<Bullet> bullets = new LinkedHashSet<>();
 	/**
-	 * List of launchers
+	 * List of launchers.
 	 */
 	private final LinkedHashSet<Launcher> launchers = new LinkedHashSet<>();
-
+	/**
+	 * List of bomb planted on board which has not exploded.
+	 */
 	private final LinkedHashSet<Bomb> bombs = new LinkedHashSet<>();
 	/**
-	 * Width of the area
+	 * Number of bomb to plant.
+	 */
+	private final ConcurrentLinkedQueue<Class<? extends Bomb>> bombToPlant = new ConcurrentLinkedQueue<>();
+	/**
+	 * Width of the area.
 	 */
 	private final float width;
 	/**
-	 * Height of the area
+	 * Height of the area.
 	 */
 	private final float height;
 	/**
-	 * World of the round
+	 * World of the round.
 	 */
 	private final World world;
 	/**
@@ -275,7 +283,7 @@ public class Round {
 	 */
 	public void add(Goal goal) {
 		if (isStarted()) {
-			throw new IllegalStateException("Le round a d�j� d�marr�");
+			throw new IllegalStateException("Round already started.");
 		}
 		Objects.requireNonNull(goal);
 		if (!isInArea(goal.getPosition())) {
@@ -304,7 +312,7 @@ public class Round {
 	 */
 	public void add(Launcher launcher) {
 		if (isStarted()) {
-			throw new IllegalStateException("Le round a d�j� d�marr�");
+			throw new IllegalStateException("Round already started.");
 		}
 		Objects.requireNonNull(launcher);
 		if (!isInArea(launcher.getPosition())) {
@@ -317,23 +325,48 @@ public class Round {
 	}
 
 	/**
-	 * Add a bomb to the round
+	 * Add bomb that user can plant.
 	 * 
-	 * @param bomb
-	 *            to add
+	 * @param classValue
+	 *            of the bomb.
+	 * @param position
+	 *            of the bomb
+	 * @return True in case of success.
 	 */
-	public void add(Bomb bomb) {
+	public boolean add(Class<? extends Bomb> classValue) {
+		return bombToPlant.add(classValue);
+	}
+
+	/**
+	 * Plant next bomb to position.
+	 * 
+	 * @param position
+	 *            of the next bomb.
+	 * @return True in case of success.
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws InvocationTargetException
+	 * @throws NoSuchMethodException
+	 * @throws SecurityException
+	 */
+	public Bomb plantNextBomb(Vec2 position) throws IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException,
+			NoSuchMethodException, SecurityException {
 		if (isStarted()) {
-			throw new IllegalStateException("Le round a d�j� d�marr�");
+			throw new IllegalStateException("Round already started.");
 		}
-		Objects.requireNonNull(bomb);
-		if (!isInArea(bomb.getPosition())) {
+		if (!isInArea(Objects.requireNonNull(position))) {
 			throw new IllegalArgumentException("Bomb must be in board.");
 		}
+		Bomb bomb = (Bomb) Bomb.getConstructor(bombToPlant.poll()).invoke(null,
+				world, position);
 		if (!bomb.isInWorld(world)) {
 			throw new IllegalStateException("Bomb is not in the world.");
 		}
-		bombs.add(bomb);
+		if (!bombs.add(bomb)) {
+			throw new IllegalStateException("Can't plant bomb.");
+		}
+		return bomb;
 	}
 
 	/**
@@ -394,5 +427,14 @@ public class Round {
 			}
 			body = body.getNext();
 		}
+	}
+
+	/**
+	 * Check if there is bomb to plant.
+	 * 
+	 * @return True if there is still a bomb.
+	 */
+	public boolean canPlantBomb() {
+		return !bombToPlant.isEmpty();
 	}
 }
