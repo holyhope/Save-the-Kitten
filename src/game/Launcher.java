@@ -86,11 +86,12 @@ public class Launcher extends GameElement {
 		BodyDef bodyDef = new BodyDef();
 		bodyDef.type = BodyType.STATIC;
 		bodyDef.active = true;
-		Objects.requireNonNull(position);
+		Objects.requireNonNull(orientation);
 		bodyDef.angle = (float) (Math.atan2(0, 1) - Math.atan2(orientation.y,
 				orientation.x));
 		bodyDef.fixedRotation = true;
-		bodyDef.position.set(position.x, position.y);
+		Objects.requireNonNull(position);
+		bodyDef.position.set(position);
 		Body body = Objects.requireNonNull(world).createBody(bodyDef);
 		Launcher launcher = new Launcher(body, position, number, orientation);
 		return launcher;

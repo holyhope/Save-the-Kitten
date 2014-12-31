@@ -6,13 +6,12 @@ import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Shape;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.geom.Ellipse2D;
 import java.lang.reflect.Method;
 import java.util.ArrayDeque;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.swing.Timer;
 
@@ -39,13 +38,18 @@ public class Bomb extends GameElement {
 	};
 
 	/**
-	 * Timer of the bomb
+	 * Timer of the bomb.
 	 */
-	private Timer timer = null;
+	private final Timer timer = new Timer(getTimerPrecision(),
+			e -> explode_proximity());
 	/**
-	 * Initial timer defined with setTimer().
+	 * Timer lock use by setTimer and startTimer.
 	 */
-	private int InitialTimer;
+	private final ReentrantReadWriteLock timerLock = new ReentrantReadWriteLock();
+	/**
+	 * Check if bomb's timer has started.
+	 */
+	private AtomicBoolean started = new AtomicBoolean();
 
 	/**
 	 * Check if Bomb has already exploded
@@ -66,31 +70,77 @@ public class Bomb extends GameElement {
 		body.createFixture(getFixtureDef());
 	}
 
+	/**
+	 * Change bomb's timer.
+	 * 
+	 * @param timer
+	 *            - new positive timer.
+	 * @throws IllegalStateException
+	 *             Must be call only once.
+	 */
 	public void setTimer(int timer) {
-		if (timer <= 0) {
+		if (timer <= 0 || timer > getMaxTimer()) {
 			throw new IllegalArgumentException("millisecond <= 0");
 		}
-		// Création d'une instance de listener
-		// associée au timer
-		ActionListener action = new ActionListener() {
-			// Méthode appelée à chaque tic du timer
-			public void actionPerformed(ActionEvent event) {
-				explode_proximity();
+		timer = Math.round(timer / getTimerPrecision()) * getTimerPrecision();
+		timerLock.writeLock().lock();
+		try {
+			if (started.get()) {
+				throw new IllegalStateException("Bomb's timer already started.");
 			}
-		};
 
-		this.timer = new Timer(timer, action);
-		InitialTimer = timer;
+			this.timer.setInitialDelay(timer);
+		} finally {
+			timerLock.writeLock().unlock();
+		}
 	}
 
+	/**
+	 * Start bomb's timer.
+	 * 
+	 * @throws IllegalStateException
+	 *             Must be call only once.
+	 */
 	public void startTimer() {
+		timerLock.readLock().lock();
+		if (started.getAndSet(true)) {
+			throw new IllegalStateException("Bomb's timer already started.");
+		}
 		timer.start();
+		timerLock.readLock().unlock();
 	}
 
-	public void stopTimer() {
-		timer.stop();
+	/**
+	 * Get precision of the timer's bomb.
+	 * 
+	 * @return precision of the bomb.
+	 */
+	public int getTimerPrecision() {
+		return 1000;
 	}
 
+	/**
+	 * Get max timer's value of the bomb.
+	 * 
+	 * @return max value.
+	 */
+	public int getMaxTimer() {
+		return 3000;
+	}
+
+	/**
+	 * Apply an impulse to body at applyPoint from blastCenter with blastPower
+	 * strength.
+	 * 
+	 * @param body
+	 *            to impulse.
+	 * @param blastCenter
+	 *            - where the impulse come from
+	 * @param applyPoint
+	 *            - where the impulse apply.
+	 * @param blastPower
+	 *            - strength of the impulse
+	 */
 	private static void applyBlastImpulse(Body body, Vec2 blastCenter,
 			Vec2 applyPoint, float blastPower) {
 		// ignore any non-dynamic bodies
@@ -173,6 +223,7 @@ public class Bomb extends GameElement {
 		Color color = graphics.getColor();
 		Font font = graphics.getFont();
 		float delay = this.timer.getDelay();
+		int InitialTimer = timer.getInitialDelay();
 		graphics.setColor(new Color((InitialTimer - Math.round(delay)) * 255
 				/ InitialTimer, Math.round(delay) * 255 / InitialTimer, 100));
 		super.draw(graphics);

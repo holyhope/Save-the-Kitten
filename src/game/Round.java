@@ -235,17 +235,24 @@ public class Round {
 			throw new IllegalStateException("Round already started.");
 		}
 		startLaunch();
-		bombs.stream().forEach(Bomb::startTimer);
+		startBombs();
 
 		do {
 			update();
 		} while (!isVictory() && !isDefeat());
 
 		stopLaunch();
-		bombs.stream().forEach(Bomb::stopTimer);
+		// bombs.stream().forEach(Bomb::stopTimer);
 		synchronized (endLock) {
 			endLock.notifyAll();
 		}
+	}
+
+	/**
+	 * Start timer of all bombs.
+	 */
+	private void startBombs() {
+		bombs.stream().forEach(Bomb::startTimer);
 	}
 
 	/**

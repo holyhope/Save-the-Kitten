@@ -62,7 +62,6 @@ public class Game {
 		launcher.addBullet(Cat.class);
 		round.add(launcher);
 		round.add(Goal.create(world, new Vec2(0, 3)));
-		// round.add(Goal.create(world, new Vec2(2, 3)));
 		round.add(Bomb.class);
 
 		return round;
@@ -348,6 +347,20 @@ public class Game {
 		}
 	}
 
+	/**
+	 * Add a bomb at position pointed by event.
+	 * 
+	 * @param round
+	 *            where to place the bomb.
+	 * @param event
+	 *            pointing the position.
+	 * @return Bomb planted.
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws InvocationTargetException
+	 * @throws NoSuchMethodException
+	 * @throws SecurityException
+	 */
 	private Bomb plantBomb(Round round, MotionEvent event)
 			throws IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException, NoSuchMethodException, SecurityException {
@@ -358,15 +371,28 @@ public class Game {
 		return round.plantNextBomb(position);
 	}
 
-	private int nextTimer(int timer) {
-		final int precision = 1000;
-		final int maxTimer = 3000;
-		return timer % maxTimer + precision;
+	/**
+	 * Increase timer.
+	 * 
+	 * @param bomb bomb to change
+	 * @param timer
+	 *            - actual timer.
+	 * @return new timer.
+	 */
+	private int increaseTimer(Bomb bomb, int timer) {
+		timer = timer % bomb.getMaxTimer() + bomb.getTimerPrecision();
+		bomb.setTimer(timer);
+		return timer;
 	}
 
-	private int resetTimer() {
-		final int precision = 1000;
-		return precision;
+	/**
+	 * Get initial timer's value.
+	 * 
+	 * @return new timer.
+	 */
+	private int resetTimer(Bomb bomb) {
+		bomb.setTimer(bomb.getTimerPrecision());
+		return bomb.getTimerPrecision();
 	}
 
 	/**
@@ -386,7 +412,7 @@ public class Game {
 			throws IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException, NoSuchMethodException, SecurityException {
 
-		int timer = resetTimer();
+		int timer = 1;
 		Bomb bomb = null;
 		while (round.canPlantBomb()) {
 			context.renderFrame((g, contentLost) -> {
@@ -407,13 +433,14 @@ public class Game {
 				if (bomb != null) {
 					// Check to change timer
 					if (Graphics.clickOnGameElement(context, event, bomb)) {
-						timer = nextTimer(timer);
+						timer = increaseTimer(bomb, timer);
 					} else {
 						bomb = plantBomb(round, event);
+						timer = resetTimer(bomb);
 					}
 				} else {
 					bomb = plantBomb(round, event);
-					timer = resetTimer();
+					timer = resetTimer(bomb);
 				}
 				bomb.setTimer(timer);
 			} catch (InterruptedException e) {
