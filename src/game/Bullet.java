@@ -25,9 +25,12 @@ public abstract class Bullet extends GameElement {
 	private final String name = "Unamed bullet (" + nbCat.getAndIncrement()
 			+ ")";
 	/**
-	 * True if bullet is not active
+	 * True if bullet is not active.
 	 */
 	private boolean stopped = false;
+	/**
+	 * True if bullet fired.
+	 */
 	private boolean started = false;
 	/**
 	 * Filter contact

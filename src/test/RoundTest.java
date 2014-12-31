@@ -28,22 +28,22 @@ public class RoundTest {
 	@Test(expected = IllegalStateException.class)
 	public void testRoundDifferentWorld() {
 		Round round = Round.create(new World(new Vec2(0, 0)), 15, 15);
-		round.add(Launcher
-				.create(new World(new Vec2(0, 0)), new Vec2(5, 5), 20));
+		round.add(Launcher.create(new World(new Vec2(0, 0)), new Vec2(5, 5),
+				new Vec2(20, 0)));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testRoundLauncherNegative() {
 		World world = new World(new Vec2(0, 0));
 		Round round = Round.create(world, 15, 15);
-		round.add(Launcher.create(world, new Vec2(-5, 5), 20));
+		round.add(Launcher.create(world, new Vec2(-5, 5), new Vec2(20, 0)));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testRoundLauncherOut() {
 		World world = new World(new Vec2(0, 0));
 		Round round = Round.create(world, 15, 15);
-		round.add(Launcher.create(world, new Vec2(300, 50), 25));
+		round.add(Launcher.create(world, new Vec2(300, 50), new Vec2(25, 0)));
 	}
 
 	@Test(expected = IllegalStateException.class)
@@ -57,10 +57,10 @@ public class RoundTest {
 	public void testRound() {
 		World world = new World(new Vec2(0, 0));
 		Round round = Round.create(world, 15, 15);
-		round.add(Launcher.create(world, new Vec2(5, 5), 20));
+		round.add(Launcher.create(world, new Vec2(5, 5), new Vec2(20, 0)));
 		world = new World(new Vec2(0, 0));
 		round = Round.create(world, 35, 20);
-		round.add(Launcher.create(world, new Vec2(5, 5), 20));
+		round.add(Launcher.create(world, new Vec2(5, 5), new Vec2(20, 0)));
 	}
 
 	@Test

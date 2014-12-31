@@ -49,21 +49,6 @@ public class Launcher extends GameElement {
 	}
 
 	/**
-	 * Create, in world, at position, an horizontal launcher which throws 1 cat.
-	 * 
-	 * @param world
-	 *            of the launcher
-	 * @param position
-	 *            of the launcher
-	 * @param strengh
-	 *            of the canon
-	 * @return new Launcher
-	 */
-	public static Launcher create(World world, Vec2 position, float strengh) {
-		return create(world, position, new Vec2(strengh, 0));
-	}
-
-	/**
 	 * Create, in world, at position, with an orientation, a launcher which
 	 * throws number cat.
 	 * 
