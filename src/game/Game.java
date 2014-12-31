@@ -592,6 +592,7 @@ public class Game {
 		}
 		context.renderFrame((g, contentLost) -> {
 			Graphics.drawBackground(g);
+			Graphics.update(g, round);
 			Graphics.writeTextCentered(g, "Click to start the game");
 		});
 		for (;;) {
