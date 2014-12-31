@@ -353,8 +353,9 @@ public class Game {
 			InvocationTargetException, NoSuchMethodException, SecurityException {
 		Point pos = new Point(Math.round(event.getX()),
 				Math.round(event.getY()));
-		Vec2 position = new Vec2(Graphics.graphicXToGame(pos.x),
-				Graphics.graphicYToGame(pos.y));
+		Vec2 position = new Vec2(Graphics.graphicXToGame(round, pos.x),
+				Graphics.graphicYToGame(round, pos.y));
+		System.out.println(position);
 		return round.plantNextBomb(position);
 	}
 

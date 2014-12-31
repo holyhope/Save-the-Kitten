@@ -184,11 +184,6 @@ public class Graphics {
 			element.draw(graphics);
 		}
 
-		/*
-		 * graphics2D.setBackground(Graphics.BACKGROUND_COLOR);
-		 * graphics2D.clearRect(x, y, width, height); drawGrid(graphics2D, x, y,
-		 * width, height, 15);
-		 */
 		graphics2D.setTransform(AffineTransform.getTranslateInstance(x, y));
 		graphics2D.drawImage(image, AffineTransform.getScaleInstance(width
 				/ dimension.getWidth(), height / dimension.getHeight()), null);
@@ -224,8 +219,13 @@ public class Graphics {
 	 *            from zen4
 	 * @return new value
 	 */
-	public static float graphicYToGame(int value) {
-		return ((float) value - TOP_PIXEL.get()) / DEFINITION;
+	public static float graphicYToGame(Round round, int value) {
+		int height = Math.round(DEFINITION * round.getHeight());
+		float newValue = value - TOP_PIXEL.get();
+		newValue *= height / (float) HEIGHT.get();
+		newValue -= height;
+		newValue /= -DEFINITION;
+		return newValue;
 	}
 
 	/**
@@ -235,8 +235,12 @@ public class Graphics {
 	 *            from zen4
 	 * @return new value
 	 */
-	public static float graphicXToGame(int value) {
-		return ((float) value - LEFT_PIXEL.get()) / DEFINITION;
+	public static float graphicXToGame(Round round, int value) {
+		int width = Math.round(DEFINITION * round.getWidth());
+		float newValue = value - LEFT_PIXEL.get();
+		newValue *= width / (float) WIDTH.get();
+		newValue /= DEFINITION;
+		return newValue;
 	}
 
 	/**
