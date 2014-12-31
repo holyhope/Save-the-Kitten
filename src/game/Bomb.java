@@ -72,7 +72,7 @@ public class Bomb extends GameElement {
 	 */
 	private static final int MAX_TIMER = 3000;
 
-	private Bomb(Body body) {
+	protected Bomb(Body body) {
 		super(body);
 		body.createFixture(getFixtureDef());
 	}
@@ -149,7 +149,7 @@ public class Bomb extends GameElement {
 	 * @param blastPower
 	 *            - strength of the impulse
 	 */
-	private static void applyBlastImpulse(Body body, Vec2 blastCenter,
+	protected void applyBlastImpulse(Body body, Vec2 blastCenter,
 			Vec2 applyPoint, float blastPower) {
 		// ignore any non-dynamic bodies
 		if (body.getType() != BodyType.DYNAMIC)
@@ -172,7 +172,7 @@ public class Bomb extends GameElement {
 	 * @throws IllegalStateException
 	 *             Must be called only once.
 	 */
-	private void explode() {
+	protected void explode() {
 		timer.stop();
 		if (hasExplosed.getAndSet(true)) {
 			throw new IllegalStateException("Bomb has already exploded");
