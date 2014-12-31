@@ -53,6 +53,7 @@ public abstract class Bullet extends GameElement {
 		bodyDef.type = BodyType.DYNAMIC;
 		bodyDef.bullet = true;
 		bodyDef.active = false;
+		bodyDef.fixedRotation = false;
 		Objects.requireNonNull(vec2);
 		bodyDef.position.set(vec2.x, vec2.y);
 		Objects.requireNonNull(velocity);

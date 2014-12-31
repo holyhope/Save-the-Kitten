@@ -49,7 +49,7 @@ public class Launcher extends GameElement {
 		}
 		Objects.requireNonNull(position);
 		Objects.requireNonNull(orientation);
-		this.orientation = new Vec2(orientation.x, orientation.y);
+		this.orientation = new Vec2().set(orientation);
 	}
 
 	/**
@@ -87,10 +87,9 @@ public class Launcher extends GameElement {
 		bodyDef.type = BodyType.STATIC;
 		bodyDef.active = true;
 		Objects.requireNonNull(position);
-		Vec2 orientationNormalized = new Vec2();
-		orientationNormalized.set(orientation).normalize();
-		bodyDef.angle = (float) Math.acos(Vec2.dot(new Vec2(1, 0),
-				orientationNormalized));
+		bodyDef.angle = (float) (Math.atan2(0, 1) - Math.atan2(orientation.y,
+				orientation.x));
+		bodyDef.fixedRotation = true;
 		bodyDef.position.set(position.x, position.y);
 		Body body = Objects.requireNonNull(world).createBody(bodyDef);
 		Launcher launcher = new Launcher(body, position, number, orientation);

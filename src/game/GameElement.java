@@ -27,7 +27,6 @@ public abstract class GameElement {
 		body.setUserData(this);
 	}
 
-	
 	/**
 	 * Get the real position of the element in the round
 	 * 

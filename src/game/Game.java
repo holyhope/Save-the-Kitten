@@ -58,7 +58,7 @@ public class Game {
 		World world = new World(new Vec2(0, 0));
 		Round round = Round.create(world, 5f, 5f);
 		Launcher launcher = Launcher.create(world, new Vec2(3, 2), 1, new Vec2(
-				-0.001f, 0.001f));
+				-.001f, .001f));
 		launcher.addBullet(Cat.class);
 		round.add(launcher);
 		round.add(Goal.create(world, new Vec2(0, 3)));
@@ -74,7 +74,7 @@ public class Game {
 		World world = new World(new Vec2(0, 0));
 		Round round = Round.create(world, 5f, 5f);
 		Launcher launcher = Launcher.create(world, new Vec2(2, 2), 1, new Vec2(
-				0.001f, -0.001f));
+				.001f, -.001f));
 		launcher.addBullet(Cat.class);
 		round.add(launcher);
 		round.add(Goal.create(world, new Vec2(3, 3)));
@@ -355,7 +355,6 @@ public class Game {
 				Math.round(event.getY()));
 		Vec2 position = new Vec2(Graphics.graphicXToGame(round, pos.x),
 				Graphics.graphicYToGame(round, pos.y));
-		System.out.println(position);
 		return round.plantNextBomb(position);
 	}
 
