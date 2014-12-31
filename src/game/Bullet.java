@@ -29,7 +29,7 @@ public abstract class Bullet extends GameElement {
 	 * True if bullet is not active
 	 */
 	private boolean stopped = false;
-	private AtomicBoolean launched = new AtomicBoolean();
+	private AtomicBoolean started = new AtomicBoolean();
 	/**
 	 * Filter contact
 	 */
@@ -125,7 +125,7 @@ public abstract class Bullet extends GameElement {
 	 * Active the bullet
 	 */
 	public void start() {
-		launched.set(true);
+		started.set(true);
 		setActive(true);
 	}
 
@@ -146,8 +146,13 @@ public abstract class Bullet extends GameElement {
 		return stopped;
 	}
 
-	public boolean isLaunched() {
-		return launched.get();
+	/**
+	 * Check if the bullet started at least once.
+	 * 
+	 * @return True if the bullet fired once.
+	 */
+	public boolean isStarted() {
+		return started.get();
 	}
 
 	/**

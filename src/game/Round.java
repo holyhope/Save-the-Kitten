@@ -216,7 +216,7 @@ public class Round {
 	 * @return True if defeat
 	 */
 	public boolean isDefeat() {
-		return bullets.stream().allMatch(Bullet::isLaunched)
+		return bullets.stream().allMatch(Bullet::isStarted)
 				&& bullets.stream().anyMatch(Bullet::isStopped) && !isVictory();
 	}
 

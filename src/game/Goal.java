@@ -65,7 +65,9 @@ public class Goal extends GameElement {
 			nbCat.decrementAndGet();
 			return false;
 		}
-		bullet.stop();
+		if (isFull()) {
+			setActive(false);
+		}
 		return true;
 	}
 
