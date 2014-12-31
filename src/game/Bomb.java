@@ -150,17 +150,18 @@ public class Bomb extends GameElement {
 	protected void applyBlastImpulse(Body body, Vec2 blastCenter,
 			Vec2 applyPoint, float blastPower) {
 		// ignore any non-dynamic bodies
-		if (body.getType() != BodyType.DYNAMIC)
+		if (body.getType() != BodyType.DYNAMIC) {
 			return;
-		Vec2 blastDir = new Vec2(applyPoint.add(blastCenter.negate()));
+		}
+		Vec2 blastDir = applyPoint.sub(blastCenter);
 		float distance = blastDir.normalize();
-		// ignore bodies exactly at the blast point - blast direction is
-		// undefined
-		if (distance == 0)
+		if (distance == 0) {
+			// ignore bodies exactly at the blast point - blast direction is
+			// undefined
 			return;
-		float invDistance = 1 / distance;
-		float impulseMag = blastPower * invDistance * invDistance;
-		impulseMag = Math.min(impulseMag, 500.0f);
+		}
+		float impulseMag = blastPower / (distance * distance);
+		impulseMag = Math.min(impulseMag, 500f);
 		body.applyLinearImpulse(blastDir.mul(impulseMag), applyPoint);
 	}
 
@@ -179,8 +180,8 @@ public class Bomb extends GameElement {
 
 		// find all fixtures within blast radius AABB
 		MyQueryCallback queryCallback = new MyQueryCallback();
-		Vec2 vec = new Vec2(Math.round(BLAST_RADIUS), Math.round(BLAST_RADIUS));
-		AABB aabb = new AABB(center.add(vec.negate()), center.add(vec));
+		Vec2 vec = new Vec2(BLAST_RADIUS, BLAST_RADIUS);
+		AABB aabb = new AABB(center.sub(vec), center.add(vec));
 		getWorld().queryAABB(queryCallback, aabb);
 
 		// check which of these have their center of mass within the blast
@@ -188,10 +189,12 @@ public class Bomb extends GameElement {
 		for (int i = 0; i < queryCallback.foundBodies.size(); i++) {
 			Body body = queryCallback.foundBodies.pollFirst();
 			Vec2 bodyCom = body.getWorldCenter();
-			// ignore bodies outside the blast range
-			if (new Vec2(bodyCom.add(center.negate())).length() >= BLAST_RADIUS)
+
+			if (bodyCom.sub(center).length() >= BLAST_RADIUS) {
+				// ignore bodies outside the blast range
 				continue;
-			applyBlastImpulse(body, center, bodyCom, BLAST_POWER * 0.05f);
+			}
+			applyBlastImpulse(body, center, bodyCom, BLAST_POWER);
 		}
 	}
 
