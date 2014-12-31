@@ -284,8 +284,8 @@ public class Game {
 			}
 			try {
 				Round round = rounds.get(deltaPage + i + halfRoundDisplayed);
-				graphics2D.clearRect(x, y+height, width, height);
-				Graphics.update(graphics2D, round, x, y+height, width, height);
+				graphics2D.clearRect(x, y + height, width, height);
+				Graphics.update(graphics2D, round, x, y + height, width, height);
 			} catch (Exception e) {
 
 			}
@@ -300,8 +300,7 @@ public class Game {
 				+ height - halfSeparatorSize, Graphics.WIDTH.get(),
 				separatorSize);
 		drawRoundSelectorCurrentPage(graphics2D, page);
-		drawRoundSelectorArrows(graphics2D, page > 0,
-				page < Math.floor(rounds.size() / ROUNDS_DISPLAYED));
+		drawRoundSelectorArrows(graphics2D, page > 0, page < getLastPage());
 	}
 
 	/**
@@ -315,8 +314,21 @@ public class Game {
 	private void drawRoundSelectorCurrentPage(Graphics2D graphics2D, int page) {
 		graphics2D.setColor(Color.WHITE);
 		graphics2D.setFont(new Font("Verdana", 0, 15));
-		graphics2D.drawString("page " + (1 + page) + "/"
-				+ (1 + rounds.size() / ROUNDS_DISPLAYED), 10, 15);
+		graphics2D.drawString("page " + (1 + page) + "/" + (1 + getLastPage()),
+				10, 15);
+	}
+
+	/**
+	 * Get number of the page.
+	 * 
+	 * @return
+	 */
+	private int getLastPage() {
+		int lastPage = rounds.size() / ROUNDS_DISPLAYED;
+		if (rounds.size() % ROUNDS_DISPLAYED == 0) {
+			lastPage--;
+		}
+		return lastPage;
 	}
 
 	/**
@@ -445,8 +457,7 @@ public class Game {
 														- (Graphics.TOP_PIXEL
 																.get() + Graphics.HEIGHT
 																.get()))) {
-							if (page < Math.floor(rounds.size()
-									/ ROUNDS_DISPLAYED)) {
+							if (page < getLastPage()) {
 								page++;
 								pageChanged = true;
 							}
