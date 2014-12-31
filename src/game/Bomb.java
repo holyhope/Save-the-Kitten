@@ -24,8 +24,13 @@ import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 
+/**
+ * 
+ * @author PERONNET Pierre
+ * @author PICHOU Maxime
+ */
 public class Bomb extends GameElement {
-	static class MyQueryCallback implements QueryCallback {
+	private static class MyQueryCallback implements QueryCallback {
 		public ArrayDeque<Body> foundBodies = new ArrayDeque<Body>();
 
 		@Override
@@ -247,9 +252,11 @@ public class Bomb extends GameElement {
 	}
 
 	/**
+	 * Get the constructor for a new Bomb of type classValue.
 	 * 
 	 * @param classValue
-	 * @return
+	 *            of the new Bomb to create.
+	 * @return new method.
 	 * @throws NoSuchMethodException
 	 * @throws SecurityException
 	 * @throws IllegalAccessException

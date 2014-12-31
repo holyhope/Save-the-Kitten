@@ -21,6 +21,11 @@ import fr.umlv.zen4.ApplicationContext;
 import fr.umlv.zen4.MotionEvent;
 import fr.umlv.zen4.MotionEvent.Action;
 
+/**
+ * 
+ * @author PERONNET Pierre
+ * @author PICHOU Maxime
+ */
 public class Game {
 	private static final int ROUNDS_DISPLAYED = 4;
 	private static final int NUMBER_DEFAULT_ROUND = 8;

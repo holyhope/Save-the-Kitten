@@ -10,6 +10,11 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.World;
 
+/**
+ * 
+ * @author PERONNET Pierre
+ * @author PICHOU Maxime
+ */
 public final class Cat extends Bullet {
 	/**
 	 * Create a cat

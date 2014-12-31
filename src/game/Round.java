@@ -20,6 +20,11 @@ import org.jbox2d.dynamics.Filter;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.World;
 
+/**
+ * 
+ * @author PERONNET Pierre
+ * @author PICHOU Maxime
+ */
 public class Round {
 	/**
 	 * List of Goals.
@@ -339,8 +344,6 @@ public class Round {
 	 * 
 	 * @param classValue
 	 *            of the bomb.
-	 * @param position
-	 *            of the bomb
 	 * @return True in case of success.
 	 */
 	public boolean add(Class<? extends Bomb> classValue) {
@@ -383,18 +386,18 @@ public class Round {
 	}
 
 	/**
-	 * Get width of the area
+	 * Get width of the area.
 	 * 
-	 * @return width
+	 * @return width.
 	 */
 	public float getWidth() {
 		return width;
 	}
 
 	/**
-	 * Get height of the area
+	 * Get height of the area.
 	 * 
-	 * @return height
+	 * @return height.
 	 */
 	public float getHeight() {
 		return height;
@@ -403,7 +406,7 @@ public class Round {
 	/**
 	 * Draw walls in area.
 	 * 
-	 * @param graphics
+	 * @param graphics2D
 	 *            to draw in
 	 */
 	public void draw(Graphics2D graphics2D) {

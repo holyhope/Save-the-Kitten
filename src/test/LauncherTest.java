@@ -11,6 +11,11 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.World;
 import org.junit.Test;
 
+/**
+ * 
+ * @author PERONNET Pierre
+ * @author PICHOU Maxime
+ */
 public class LauncherTest {
 	@Test(expected = NullPointerException.class)
 	public void testLauncherPositionNull() {

@@ -14,6 +14,11 @@ import org.jbox2d.dynamics.Filter;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 
+/**
+ * 
+ * @author PERONNET Pierre
+ * @author PICHOU Maxime
+ */
 public abstract class Bullet extends GameElement {
 	/**
 	 * Total amount of cat
@@ -77,9 +82,11 @@ public abstract class Bullet extends GameElement {
 	}
 
 	/**
+	 * Get the constructor for a new Bullet of type classValue.
 	 * 
 	 * @param classValue
-	 * @return
+	 *            of the new Bullet to create.
+	 * @return new method.
 	 * @throws NoSuchMethodException
 	 * @throws SecurityException
 	 * @throws IllegalAccessException
@@ -159,6 +166,9 @@ public abstract class Bullet extends GameElement {
 
 	/**
 	 * Called when contact with another body is ended
+	 * 
+	 * @param body
+	 *            colliding width that element.
 	 */
 	public abstract void endContact(Body body);
 }

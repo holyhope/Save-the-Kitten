@@ -6,6 +6,11 @@ import org.jbox2d.collision.Manifold;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.contacts.Contact;
 
+/**
+ * 
+ * @author PERONNET Pierre
+ * @author PICHOU Maxime
+ */
 public class Collide implements ContactListener {
 	@Override
 	public void beginContact(Contact contact) {

@@ -19,6 +19,11 @@ import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.World;
 
+/**
+ * 
+ * @author PERONNET Pierre
+ * @author PICHOU Maxime
+ */
 public class Launcher extends GameElement {
 	/**
 	 * Number of millisecond between two bullet
@@ -85,7 +90,7 @@ public class Launcher extends GameElement {
 	/**
 	 * Add a bullet to the canon.
 	 * 
-	 * @param Class
+	 * @param classValue
 	 *            of the new bullet
 	 * @return True in case of success.
 	 * @throws SecurityException

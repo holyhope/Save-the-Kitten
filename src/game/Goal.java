@@ -12,6 +12,11 @@ import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 
+/**
+ * 
+ * @author PERONNET Pierre
+ * @author PICHOU Maxime
+ */
 public class Goal extends GameElement {
 	private final int nbSlot = 1;
 	private final AtomicInteger nbCat = new AtomicInteger();

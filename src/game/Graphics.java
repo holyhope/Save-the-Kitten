@@ -15,6 +15,11 @@ import fr.umlv.zen4.MotionEvent;
 import fr.umlv.zen4.MotionEvent.Action;
 import fr.umlv.zen4.ScreenInfo;
 
+/**
+ * 
+ * @author PERONNET Pierre
+ * @author PICHOU Maxime
+ */
 public class Graphics {
 	/**
 	 * Width of the panel
@@ -73,8 +78,8 @@ public class Graphics {
 	 * @param string
 	 *            text to paint
 	 */
-	public static void writeTextCentered(Graphics2D g, String string) {
-		writeTextCentered(g, string, WIDTH.get() / 2, HEIGHT.get() / 2);
+	public static void writeTextCentered(Graphics2D graphics2D, String string) {
+		writeTextCentered(graphics2D, string, WIDTH.get() / 2, HEIGHT.get() / 2);
 	}
 
 	/**
@@ -103,12 +108,12 @@ public class Graphics {
 	 * 
 	 * @param graphics
 	 *            to draw in.
+	 * @param x
+	 * @param y
+	 * @param width
+	 * @param height
 	 * @param step
 	 *            between two line.
-	 * @param j
-	 * @param height2
-	 * @param width2
-	 * @param y
 	 */
 	public static void drawGrid(Graphics2D graphics, int x, int y, int width,
 			int height, int step) {
