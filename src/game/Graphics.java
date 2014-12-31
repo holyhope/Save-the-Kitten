@@ -212,6 +212,35 @@ public class Graphics {
 		return Math.round(value * DEFINITION);
 	}
 
+	private static int realGameToGraphicPositionX(Round round, float x) {
+		int width = Math.round(DEFINITION * round.getWidth());
+		x *= WIDTH.get() / (float) width;
+		x += LEFT_PIXEL.get();
+		return Math.round(x);
+	}
+
+	private static int realGameToGraphicPositionY(Round round, float y) {
+		int height = Math.round(DEFINITION * round.getHeight());
+		y += height;
+		y *= HEIGHT.get() / (float) height;
+		y += TOP_PIXEL.get();
+		return Math.round(y);
+	}
+
+	private static int realGameToGraphicRadiusX(Round round, float radiusX) {
+		int width = Math.round(DEFINITION * round.getWidth());
+		radiusX *= DEFINITION;
+		radiusX *= WIDTH.get() / (float) width;
+		return Math.round(radiusX);
+	}
+
+	private static int realGameToGraphicRadiusY(Round round, float radiusY) {
+		int height = Math.round(DEFINITION * round.getHeight());
+		radiusY *= DEFINITION;
+		radiusY *= HEIGHT.get() / (float) height;
+		return Math.round(radiusY);
+	}
+
 	/**
 	 * Convert value from zen4 to jbox2d
 	 * 
@@ -364,22 +393,26 @@ public class Graphics {
 	 * Check if user left click in area represented by gameElement.
 	 * 
 	 * @param context
-	 *            of the application
+	 *            of the application.
 	 * @param event
-	 *            of the mouse
+	 *            of the mouse.
+	 * @param round
+	 *            of gameElement.
 	 * @param gameElement
-	 *            to check
+	 *            to check.
 	 * @return True if user clicked on gameElement.
 	 */
 	public static boolean clickOnGameElement(ApplicationContext context,
-			MotionEvent event, GameElement gameElement) {
+			MotionEvent event, Round round, GameElement gameElement) {
 		Point position = Objects.requireNonNull(gameElement)
 				.getGraphicPosition();
-		int radiusX = Math
-				.abs(Graphics.gameToGraphicX(gameElement.getRadius()));
-		int radiusY = Math
-				.abs(Graphics.gameToGraphicY(gameElement.getRadius()));
-		return Graphics.click(context, event, position.x - radiusX, position.y
-				- radiusY, radiusX * 2, radiusY * 2);
+		int x = realGameToGraphicPositionX(round, position.x);
+		int y = realGameToGraphicPositionY(round, position.y);
+		int radiusX = Math.abs(realGameToGraphicRadiusX(round,
+				gameElement.getRadius()));
+		int radiusY = Math.abs(realGameToGraphicRadiusY(round,
+				gameElement.getRadius()));
+		return Graphics.click(context, event, x - radiusX, y - radiusY,
+				radiusX * 2, radiusY * 2);
 	}
 }

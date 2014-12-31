@@ -28,7 +28,7 @@ import org.jbox2d.dynamics.World;
 
 public class Bomb extends GameElement {
 	static class MyQueryCallback implements QueryCallback {
-		public ArrayDeque<Body> foundBodies;
+		public ArrayDeque<Body> foundBodies = new ArrayDeque<Body>();
 
 		@Override
 		public boolean reportFixture(Fixture fixture) {
@@ -90,6 +90,7 @@ public class Bomb extends GameElement {
 			}
 
 			this.timer.setInitialDelay(timer);
+			this.timer.setDelay(this.timer.getInitialDelay());
 		} finally {
 			timerLock.writeLock().unlock();
 		}

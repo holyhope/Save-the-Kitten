@@ -374,12 +374,13 @@ public class Game {
 	/**
 	 * Increase timer.
 	 * 
-	 * @param bomb bomb to change
+	 * @param bomb
+	 *            bomb to change
 	 * @param timer
 	 *            - actual timer.
 	 * @return new timer.
 	 */
-	private int increaseTimer(Bomb bomb, int timer) {
+	private int increaseBombTimer(Bomb bomb, int timer) {
 		timer = timer % bomb.getMaxTimer() + bomb.getTimerPrecision();
 		bomb.setTimer(timer);
 		return timer;
@@ -432,8 +433,9 @@ public class Game {
 				}
 				if (bomb != null) {
 					// Check to change timer
-					if (Graphics.clickOnGameElement(context, event, bomb)) {
-						timer = increaseTimer(bomb, timer);
+					if (Graphics
+							.clickOnGameElement(context, event, round, bomb)) {
+						timer = increaseBombTimer(bomb, timer);
 					} else {
 						bomb = plantBomb(round, event);
 						timer = resetTimer(bomb);
@@ -517,8 +519,12 @@ public class Game {
 							thread.start();
 
 							long previous = System.currentTimeMillis();
-							while (!round.isVictory() && !round.isDefeat()) {
+							for (;;) {
 								if (!thread.isAlive()) {
+									// Stop condition
+									if (round.isVictory() || round.isDefeat()) {
+										break;
+									}
 									Graphics.addException(new Exception(thread
 											.getName()));
 									context.renderFrame((g, contentLost) -> {
@@ -530,8 +536,9 @@ public class Game {
 									}
 									context.exit(3);
 									return;
-								}
-								if (System.currentTimeMillis() - previous > Graphics.REFRESH_TIME) {
+								} else if (System.currentTimeMillis()
+										- previous > Graphics.REFRESH_TIME) {
+									// Update graphic
 									context.renderFrame((g, contentLost) -> {
 										Graphics.drawBackground(g);
 										Graphics.update(g, round);
