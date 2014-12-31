@@ -368,6 +368,9 @@ public class Round {
 		if (!isInArea(Objects.requireNonNull(position))) {
 			throw new IllegalArgumentException("Bomb must be in board.");
 		}
+		if (bombToPlant.isEmpty()) {
+			throw new IllegalStateException("Nom more bomb to plant.");
+		}
 		Bomb bomb = (Bomb) Bomb.getConstructor(bombToPlant.poll()).invoke(null,
 				world, position);
 		if (!bomb.isInWorld(world)) {

@@ -556,7 +556,7 @@ public class Game {
 
 		int timer = 1;
 		Bomb bomb = null;
-		while (round.canPlantBomb()) {
+		for (;;) {
 			context.renderFrame((g, contentLost) -> {
 				Graphics.drawBackground(g);
 				Graphics.update(g, round);
@@ -578,10 +578,16 @@ public class Game {
 							.clickOnGameElement(context, event, round, bomb)) {
 						timer = increaseBombTimer(bomb, timer);
 					} else {
+						if (!round.canPlantBomb()) {
+							break;
+						}
 						bomb = plantBomb(round, event);
 						timer = resetTimer(bomb);
 					}
 				} else {
+					if (!round.canPlantBomb()) {
+						break;
+					}
 					bomb = plantBomb(round, event);
 					timer = resetTimer(bomb);
 				}

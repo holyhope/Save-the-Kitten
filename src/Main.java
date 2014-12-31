@@ -14,17 +14,6 @@ public class Main {
 		game.runApplication();
 	}
 
-	/*
-	 * World world = new World(new Vec2(0, 0)); Launcher launcher =
-	 * Launcher.create(world, new Point(5, 5), 3, new Vec2(0.1f,0)); Round round
-	 * = Round.create(new Dimension(30, 30), launcher);
-	 * round.add(Goal.create(world, new Point(2, 2)));
-	 * round.add(Goal.create(world, new Point(3, 2)));
-	 * round.add(Goal.create(world, new Point(2, 3))); round.start(); if (
-	 * round.isVictory() ) { System.out.println("Victory !"); } else if (
-	 * round.isDefeat() ) { System.out.println("Defeat !"); }
-	 */
-
 	public static void jBox2DExample(String[] args) {
 		Vec2 gravity = new Vec2(0, -10);
 		World world = new World(gravity);
