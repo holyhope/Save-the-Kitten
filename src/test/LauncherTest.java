@@ -1,6 +1,10 @@
 package test;
 
 import static org.junit.Assert.assertEquals;
+
+import java.lang.reflect.InvocationTargetException;
+
+import game.Cat;
 import game.Launcher;
 
 import org.jbox2d.common.Vec2;
@@ -32,7 +36,17 @@ public class LauncherTest {
 		Launcher launcher;
 		World world = new World(new Vec2(0, 0));
 
-		launcher = Launcher.create(world, new Vec2(5, 7), 3, new Vec2(1, 0));
+		launcher = Launcher.create(world, new Vec2(5, 7), new Vec2(1, 0));
+		try {
+			launcher.addBullet(Cat.class);
+			launcher.addBullet(Cat.class);
+			launcher.addBullet(Cat.class);
+		} catch (IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException | NoSuchMethodException
+				| SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		launcher.launch();
 		assertEquals(4, world.getBodyCount());
 

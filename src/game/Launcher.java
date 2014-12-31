@@ -41,12 +41,8 @@ public class Launcher extends GameElement {
 	 */
 	private final Random randomAngle = new Random();
 
-	private Launcher(Body body, Vec2 position, int nbCat, Vec2 orientation) {
+	private Launcher(Body body, Vec2 position, Vec2 orientation) {
 		super(body);
-		if (nbCat <= 0) {
-			throw new IllegalArgumentException(
-					"Le nombre de chat doit etre positif.");
-		}
 		Objects.requireNonNull(position);
 		Objects.requireNonNull(orientation);
 		this.orientation = new Vec2().set(orientation);
@@ -64,7 +60,7 @@ public class Launcher extends GameElement {
 	 * @return new Launcher
 	 */
 	public static Launcher create(World world, Vec2 position, float strengh) {
-		return create(world, position, 1, new Vec2(strengh, 0));
+		return create(world, position, new Vec2(strengh, 0));
 	}
 
 	/**
@@ -75,14 +71,11 @@ public class Launcher extends GameElement {
 	 *            of the launcher
 	 * @param position
 	 *            of the launcher
-	 * @param number
-	 *            of bullet to launch
 	 * @param orientation
 	 *            of the canon
 	 * @return new Launcher
 	 */
-	public static Launcher create(World world, Vec2 position, int number,
-			Vec2 orientation) {
+	public static Launcher create(World world, Vec2 position, Vec2 orientation) {
 		BodyDef bodyDef = new BodyDef();
 		bodyDef.type = BodyType.STATIC;
 		bodyDef.active = true;
@@ -93,7 +86,7 @@ public class Launcher extends GameElement {
 		Objects.requireNonNull(position);
 		bodyDef.position.set(position);
 		Body body = Objects.requireNonNull(world).createBody(bodyDef);
-		Launcher launcher = new Launcher(body, position, number, orientation);
+		Launcher launcher = new Launcher(body, position, orientation);
 		return launcher;
 	}
 

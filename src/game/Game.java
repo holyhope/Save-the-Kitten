@@ -23,7 +23,7 @@ import fr.umlv.zen4.MotionEvent.Action;
 
 public class Game {
 	private static final int ROUNDS_DISPLAYED = 4;
-	private static final int NUMBER_DEFAULT_ROUND = 2;
+	private static final int NUMBER_DEFAULT_ROUND = 8;
 	private static final Round defaultRounds[] = new Round[NUMBER_DEFAULT_ROUND];
 	private final ArrayList<Round> rounds = new ArrayList<>();
 
@@ -57,7 +57,7 @@ public class Game {
 			NoSuchMethodException, SecurityException {
 		World world = new World(new Vec2(0, 0));
 		Round round = Round.create(world, 5f, 5f);
-		Launcher launcher = Launcher.create(world, new Vec2(3, 2), 1, new Vec2(
+		Launcher launcher = Launcher.create(world, new Vec2(3, 2), new Vec2(
 				-.001f, .001f));
 		launcher.addBullet(Cat.class);
 		round.add(launcher);
@@ -72,13 +72,124 @@ public class Game {
 			NoSuchMethodException, SecurityException {
 		World world = new World(new Vec2(0, 0));
 		Round round = Round.create(world, 5f, 5f);
-		Launcher launcher = Launcher.create(world, new Vec2(2, 2), 1, new Vec2(
+		Launcher launcher = Launcher.create(world, new Vec2(2, 4), new Vec2(
 				.001f, -.001f));
 		launcher.addBullet(Cat.class);
 		round.add(launcher);
 		round.add(Goal.create(world, new Vec2(3, 3)));
-		round.add(Goal.create(world, new Vec2(2, 3)));
 		round.createWall(2.4f, 1.5f, 1.2f, 1f);
+		round.add(Bomb.class);
+		return round;
+	}
+
+	public static Round round2() throws IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException,
+			NoSuchMethodException, SecurityException {
+		World world = new World(new Vec2(0, 0));
+		Round round = Round.create(world, 5f, 5f);
+		Launcher launcher = Launcher.create(world, new Vec2(1, 1), new Vec2(
+				.001f, .001f));
+		launcher.addBullet(Cat.class);
+		launcher.addBullet(Cat.class);
+		round.add(launcher);
+		round.add(Goal.create(world, new Vec2(1, 3)));
+		round.add(Goal.create(world, new Vec2(3, 3)));
+		round.add(Bomb.class);
+		return round;
+	}
+
+	public static Round round3() throws IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException,
+			NoSuchMethodException, SecurityException {
+		World world = new World(new Vec2(0, 0));
+		Round round = Round.create(world, 5f, 5f);
+		Launcher launcher = Launcher.create(world, new Vec2(1, 1), new Vec2(
+				.001f, 0f));
+		launcher.addBullet(ParkourCat.class);
+		launcher.addBullet(Cat.class);
+		round.add(launcher);
+		round.add(Goal.create(world, new Vec2(3, 3)));
+		round.add(Goal.create(world, new Vec2(2, 3)));
+		round.createWall(3f, 0f, 1f, 2.9f);
+		round.add(Bomb.class);
+		round.add(Bomb.class);
+		return round;
+	}
+
+	public static Round round4() throws IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException,
+			NoSuchMethodException, SecurityException {
+		World world = new World(new Vec2(0, 0));
+		Round round = Round.create(world, 5f, 5f);
+		Launcher launcher = Launcher.create(world, new Vec2(1, 3), new Vec2(
+				.001f, 0));
+		launcher.addBullet(Cat.class);
+		launcher.addBullet(ParkourCat.class);
+		round.add(launcher);
+		round.add(Goal.create(world, new Vec2(3, 3)));
+		round.add(Goal.create(world, new Vec2(2, 3)));
+		round.createWall(0f, 0f, 5f, 2.5f);
+		round.add(Vortex.class);
+		round.add(Vortex.class);
+		return round;
+	}
+
+	public static Round round5() throws IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException,
+			NoSuchMethodException, SecurityException {
+		World world = new World(new Vec2(0, 0));
+		Round round = Round.create(world, 5f, 5f);
+		Launcher launcher = Launcher.create(world, new Vec2(1, 4), new Vec2(
+				.001f, -.001f));
+		launcher.addBullet(Cat.class);
+		launcher.addBullet(Cat.class);
+		launcher.addBullet(Cat.class);
+		round.add(launcher);
+		round.add(Goal.create(world, new Vec2(2, 3)));
+		round.add(Goal.create(world, new Vec2(1, 3)));
+		round.add(Goal.create(world, new Vec2(3, 3)));
+		round.createWall(0f, 0f, 5f, 2.5f);
+		round.add(Bomb.class);
+		round.add(Vortex.class);
+		return round;
+	}
+
+	public static Round round6() throws IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException,
+			NoSuchMethodException, SecurityException {
+		World world = new World(new Vec2(0, 0));
+		Round round = Round.create(world, 5f, 5f);
+		Launcher launcher = Launcher.create(world, new Vec2(4, 2), new Vec2(
+				.001f, -.001f));
+		launcher.addBullet(Cat.class);
+		launcher.addBullet(Cat.class);
+		round.add(launcher);
+		round.add(Goal.create(world, new Vec2(2, 3)));
+		round.add(Goal.create(world, new Vec2(3, 3)));
+		round.createWall(2.4f, 1.5f, 1.2f, 1f);
+		round.add(Bomb.class);
+		round.add(Bomb.class);
+		round.add(Vortex.class);
+		return round;
+	}
+
+	public static Round round7() throws IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException,
+			NoSuchMethodException, SecurityException {
+		World world = new World(new Vec2(0, 0));
+		Round round = Round.create(world, 10f, 10f);
+		Launcher launcher = Launcher.create(world, new Vec2(4, 6), new Vec2(
+				.001f, .001f));
+		launcher.addBullet(Cat.class);
+		launcher.addBullet(ParkourCat.class);
+		launcher.addBullet(ParkourCat.class);
+		round.add(launcher);
+		round.add(Goal.create(world, new Vec2(1, 1)));
+		round.add(Goal.create(world, new Vec2(3, 1)));
+		round.add(Goal.create(world, new Vec2(1, 3)));
+		round.createWall(4f, 0f, 6f, 5f);
+		round.add(Vortex.class);
+		round.add(Vortex.class);
 		round.add(Bomb.class);
 		round.add(Bomb.class);
 		return round;
@@ -100,6 +211,24 @@ public class Game {
 				break;
 			case 1:
 				round = round1();
+				break;
+			case 2:
+				round = round2();
+				break;
+			case 3:
+				round = round3();
+				break;
+			case 4:
+				round = round4();
+				break;
+			case 5:
+				round = round5();
+				break;
+			case 6:
+				round = round6();
+				break;
+			case 7:
+				round = round7();
 				break;
 			default:
 			}
@@ -141,6 +270,7 @@ public class Game {
 		int halfSeparatorSize = separatorSize / 2;
 		int doubleHeight = height * 2;
 
+		Graphics.drawBackground(graphics2D);
 		graphics2D.setBackground(Graphics.BACKGROUND_COLOR);
 		for (int i = 0; i < halfRoundDisplayed; i++) {
 			int x = Graphics.LEFT_PIXEL.get() + i * width;
@@ -154,8 +284,8 @@ public class Game {
 			}
 			try {
 				Round round = rounds.get(deltaPage + i + halfRoundDisplayed);
-				graphics2D.clearRect(x, y, width, height);
-				Graphics.update(graphics2D, round, x, y, width, height);
+				graphics2D.clearRect(x, y+height, width, height);
+				Graphics.update(graphics2D, round, x, y+height, width, height);
 			} catch (Exception e) {
 
 			}
@@ -170,7 +300,7 @@ public class Game {
 				+ height - halfSeparatorSize, Graphics.WIDTH.get(),
 				separatorSize);
 		drawRoundSelectorCurrentPage(graphics2D, page);
-		drawRoundSelectorArrows(graphics2D, page > 1,
+		drawRoundSelectorArrows(graphics2D, page > 0,
 				page < Math.floor(rounds.size() / ROUNDS_DISPLAYED));
 	}
 
@@ -333,7 +463,7 @@ public class Game {
 										Graphics.LEFT_PIXEL.get()
 												+ Graphics.WIDTH.get(),
 										Graphics.TOP_PIXEL.get())) {
-							if (page > 1) {
+							if (page > 0) {
 								page--;
 								pageChanged = true;
 							}
