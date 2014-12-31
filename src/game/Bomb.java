@@ -53,7 +53,7 @@ public class Bomb extends GameElement {
 	/**
 	 * Check if Bomb has already exploded
 	 */
-	private static AtomicBoolean hasExplosed = new AtomicBoolean(false);
+	private AtomicBoolean hasExplosed = new AtomicBoolean(false);
 
 	/**
 	 * Radius of the blast explosion
@@ -62,7 +62,7 @@ public class Bomb extends GameElement {
 	/**
 	 * Power of the blast explosion
 	 */
-	private static final float BLAST_POWER = 1000;
+	private static final float BLAST_POWER = 100;
 	/**
 	 * Precision of the timer.
 	 */
@@ -173,6 +173,7 @@ public class Bomb extends GameElement {
 	 *             Must be called only once.
 	 */
 	private void explode() {
+		timer.stop();
 		if (hasExplosed.getAndSet(true)) {
 			throw new IllegalStateException("Bomb has already exploded");
 		}
