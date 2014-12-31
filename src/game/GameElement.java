@@ -4,6 +4,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
 import java.util.Objects;
 
 import org.jbox2d.common.Vec2;
@@ -52,7 +53,14 @@ public abstract class GameElement {
 	 * 
 	 * @return Shape of the element
 	 */
-	public abstract Shape getGraphicShape();
+	public Shape getGraphicShape() {
+		Point position = getGraphicPosition();
+		float radius = getRadius();
+		int radiusX = Math.abs(Graphics.gameToGraphicX(radius));
+		int radiusY = Math.abs(Graphics.gameToGraphicY(radius));
+		return new Ellipse2D.Float(position.x - radiusX, position.y - radiusY,
+				radiusX * 2, radiusY * 2);
+	}
 
 	/**
 	 * Enable or disable element.

@@ -1,9 +1,6 @@
 package game;
 
 import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
 import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -61,16 +58,6 @@ public abstract class Bullet extends GameElement {
 		Objects.requireNonNull(angularVelocity);
 		bodyDef.angularVelocity = angularVelocity;
 		return bodyDef;
-	}
-
-	@Override
-	public Shape getGraphicShape() {
-		Point position = getGraphicPosition();
-		float radius = getRadius();
-		int radiusX = Math.abs(Graphics.gameToGraphicX(radius));
-		int radiusY = Math.abs(Graphics.gameToGraphicY(radius));
-		return new Ellipse2D.Float(position.x - radiusX, position.y - radiusY,
-				radiusX * 2, radiusY * 2);
 	}
 
 	/**

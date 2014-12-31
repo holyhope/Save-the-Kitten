@@ -5,8 +5,6 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
 import java.lang.reflect.Method;
 import java.util.ArrayDeque;
 import java.util.Objects;
@@ -216,16 +214,6 @@ public class Bomb extends GameElement {
 		fixtureDef.density = 1;
 		fixtureDef.friction = 0.3f;
 		return fixtureDef;
-	}
-
-	@Override
-	public Shape getGraphicShape() {
-		Point position = getGraphicPosition();
-		float radius = getRadius();
-		int radiusX = Math.abs(Graphics.gameToGraphicX(radius));
-		int radiusY = Math.abs(Graphics.gameToGraphicY(radius));
-		return new Ellipse2D.Float(position.x - radiusX, position.y - radiusY,
-				radiusX * 2, radiusY * 2);
 	}
 
 	@Override
