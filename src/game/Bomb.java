@@ -40,8 +40,7 @@ public class Bomb extends GameElement {
 	/**
 	 * Timer of the bomb.
 	 */
-	private final Timer timer = new Timer(getTimerPrecision(),
-			e -> explode_proximity());
+	private final Timer timer = new Timer(getTimerPrecision(), e -> explode());
 	/**
 	 * Timer lock use by setTimer and startTimer.
 	 */
@@ -49,12 +48,12 @@ public class Bomb extends GameElement {
 	/**
 	 * Check if bomb's timer has started.
 	 */
-	private AtomicBoolean started = new AtomicBoolean();
+	private AtomicBoolean started = new AtomicBoolean(false);
 
 	/**
 	 * Check if Bomb has already exploded
 	 */
-	private static AtomicBoolean hasExplosed = new AtomicBoolean();
+	private static AtomicBoolean hasExplosed = new AtomicBoolean(false);
 
 	/**
 	 * Radius of the blast explosion
@@ -64,6 +63,14 @@ public class Bomb extends GameElement {
 	 * Power of the blast explosion
 	 */
 	private static final float BLAST_POWER = 1000;
+	/**
+	 * Precision of the timer.
+	 */
+	private static final int PRECISION_TIMER = 100;
+	/**
+	 * Max value of the timer.
+	 */
+	private static final int MAX_TIMER = 3000;
 
 	private Bomb(Body body) {
 		super(body);
@@ -76,7 +83,7 @@ public class Bomb extends GameElement {
 	 * @param timer
 	 *            - new positive timer.
 	 * @throws IllegalStateException
-	 *             Must be call only once.
+	 *             Must be called only once.
 	 */
 	public void setTimer(int timer) {
 		if (timer <= 0 || timer > getMaxTimer()) {
@@ -100,7 +107,7 @@ public class Bomb extends GameElement {
 	 * Start bomb's timer.
 	 * 
 	 * @throws IllegalStateException
-	 *             Must be call only once.
+	 *             Must be called only once.
 	 */
 	public void startTimer() {
 		timerLock.readLock().lock();
@@ -117,7 +124,7 @@ public class Bomb extends GameElement {
 	 * @return precision of the bomb.
 	 */
 	public int getTimerPrecision() {
-		return 1000;
+		return PRECISION_TIMER;
 	}
 
 	/**
@@ -126,7 +133,7 @@ public class Bomb extends GameElement {
 	 * @return max value.
 	 */
 	public int getMaxTimer() {
-		return 3000;
+		return MAX_TIMER;
 	}
 
 	/**
@@ -159,9 +166,13 @@ public class Bomb extends GameElement {
 		body.applyLinearImpulse(blastDir.mul(impulseMag), applyPoint);
 	}
 
-	private void explode_proximity() {
-
-		timer.stop();
+	/**
+	 * Make the bomb booming.
+	 * 
+	 * @throws IllegalStateException
+	 *             Must be called only once.
+	 */
+	private void explode() {
 		if (hasExplosed.getAndSet(true)) {
 			throw new IllegalStateException("Bomb has already exploded");
 		}
@@ -208,9 +219,6 @@ public class Bomb extends GameElement {
 
 	@Override
 	public Shape getGraphicShape() {
-		if (hasExplosed.get()) {
-			return new Ellipse2D.Float(0, 0, 0, 0);
-		}
 		Point position = getGraphicPosition();
 		float radius = getRadius();
 		int radiusX = Math.abs(Graphics.gameToGraphicX(radius));
@@ -221,6 +229,9 @@ public class Bomb extends GameElement {
 
 	@Override
 	public void draw(Graphics2D graphics) {
+		if (hasExplosed.get()) {
+			return;
+		}
 		Color color = graphics.getColor();
 		Font font = graphics.getFont();
 		float delay = this.timer.getDelay();
