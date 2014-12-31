@@ -63,7 +63,7 @@ public class Launcher extends GameElement {
 	public static Launcher create(World world, Vec2 position, Vec2 orientation) {
 		BodyDef bodyDef = new BodyDef();
 		bodyDef.type = BodyType.STATIC;
-		bodyDef.active = true;
+		bodyDef.active = false;
 		Objects.requireNonNull(orientation);
 		bodyDef.angle = (float) (Math.atan2(0, 1) - Math.atan2(orientation.y,
 				orientation.x));

@@ -56,7 +56,7 @@ public class Round {
 	/**
 	 * Time use for calculating step of the round
 	 */
-	private final float timeStep = 1.0f / 60.0f;
+	private final float timeStep = 1.0f / 600.0f;
 	private final int velocityIterations = 6;
 	private final int positionIterations = 2;
 	/**
@@ -226,7 +226,7 @@ public class Round {
 	private void update() {
 		try {
 			world.step(timeStep, velocityIterations, positionIterations);
-		} catch (Exception e) {
+		} catch (IndexOutOfBoundsException e) {
 		}
 	}
 

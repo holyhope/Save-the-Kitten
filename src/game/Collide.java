@@ -12,9 +12,6 @@ public class Collide implements ContactListener {
 		Body bodyA = contact.getFixtureA().getBody();
 		Body bodyB = contact.getFixtureB().getBody();
 
-		System.out.println("collision: " + bodyA.getUserData() + " - "
-				+ bodyB.getUserData());
-
 		bulletBeginContact(bodyA.getUserData(), bodyB);
 		bulletBeginContact(bodyB.getUserData(), bodyA);
 	}
