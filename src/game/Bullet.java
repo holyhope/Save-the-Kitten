@@ -3,7 +3,6 @@ package game;
 import java.awt.Graphics2D;
 import java.lang.reflect.Method;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -29,7 +28,7 @@ public abstract class Bullet extends GameElement {
 	 * True if bullet is not active
 	 */
 	private boolean stopped = false;
-	private AtomicBoolean started = new AtomicBoolean();
+	private boolean started = false;
 	/**
 	 * Filter contact
 	 */
@@ -125,8 +124,8 @@ public abstract class Bullet extends GameElement {
 	 * Active the bullet
 	 */
 	public void start() {
-		started.set(true);
 		setActive(true);
+		started = true;
 	}
 
 	/**
@@ -152,7 +151,7 @@ public abstract class Bullet extends GameElement {
 	 * @return True if the bullet fired once.
 	 */
 	public boolean isStarted() {
-		return started.get();
+		return started;
 	}
 
 	/**

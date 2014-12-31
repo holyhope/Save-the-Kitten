@@ -129,8 +129,8 @@ public class Game {
 		round.add(Goal.create(world, new Vec2(3, 3)));
 		round.add(Goal.create(world, new Vec2(2, 3)));
 		round.createWall(0f, 0f, 5f, 2.5f);
-		round.add(Vortex.class);
-		round.add(Vortex.class);
+		// round.add(Vortex.class);
+		// round.add(Vortex.class);
 		return round;
 	}
 
@@ -596,7 +596,7 @@ public class Game {
 		});
 		for (;;) {
 			try {
-				if (Action.UP.equals(context.waitAndBlockUntilAMotion()
+				if (Action.DOWN.equals(context.waitAndBlockUntilAMotion()
 						.getAction())) {
 					break;
 				}
