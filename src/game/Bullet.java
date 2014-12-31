@@ -3,6 +3,7 @@ package game;
 import java.awt.Graphics2D;
 import java.lang.reflect.Method;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -28,6 +29,7 @@ public abstract class Bullet extends GameElement {
 	 * True if bullet is not active
 	 */
 	private boolean stopped = false;
+	private AtomicBoolean launched = new AtomicBoolean();
 	/**
 	 * Filter contact
 	 */
@@ -95,10 +97,10 @@ public abstract class Bullet extends GameElement {
 		final FixtureDef fixtureDef = new FixtureDef();
 		PolygonShape dynamicBox = new PolygonShape();
 		dynamicBox.setRadius(0.1f);
-		dynamicBox.setAsBox(0.1f, 0.1f);
+		dynamicBox.setAsBox(.00000001f, .00000001f);
 		fixtureDef.shape = dynamicBox;
 		fixtureDef.density = 1;
-		fixtureDef.friction = 0.3f;
+		fixtureDef.friction = 0f;
 		return fixtureDef;
 	}
 
@@ -123,6 +125,7 @@ public abstract class Bullet extends GameElement {
 	 * Active the bullet
 	 */
 	public void start() {
+		launched.set(true);
 		setActive(true);
 	}
 
@@ -141,6 +144,10 @@ public abstract class Bullet extends GameElement {
 	 */
 	public boolean isStopped() {
 		return stopped;
+	}
+
+	public boolean isLaunched() {
+		return launched.get();
 	}
 
 	/**

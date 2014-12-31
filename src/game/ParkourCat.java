@@ -1,6 +1,5 @@
 package game;
 
-import java.awt.Graphics2D;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jbox2d.common.Vec2;
@@ -12,7 +11,7 @@ public final class ParkourCat extends Bullet {
 	/**
 	 * Number of wall climbed by the cat
 	 */
-	private AtomicInteger parkoured = new AtomicInteger();
+	private AtomicInteger parkoured = new AtomicInteger(0);
 	/**
 	 * Number of wall that the cat is able to climb
 	 */
@@ -46,16 +45,11 @@ public final class ParkourCat extends Bullet {
 	}
 
 	@Override
-	public void draw(Graphics2D g) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
 	public void beginContact(Body body) {
 		super.beginContact(body);
 		// TODO Test
 		if (parkoured.getAndIncrement() < maxParkour) {
-			setLinearVelocity(new Vec2(0, 0.1f));
+			setLinearVelocity(new Vec2(0f, .01f));
 		} else {
 			stop();
 		}
@@ -63,6 +57,6 @@ public final class ParkourCat extends Bullet {
 
 	@Override
 	public void endContact(Body body) {
-		// TODO make the cat 'jump'
+		setLinearVelocity(new Vec2(.01f, .01f));
 	}
 }

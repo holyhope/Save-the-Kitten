@@ -56,7 +56,7 @@ public class Bomb extends GameElement {
 	/**
 	 * Radius of the blast explosion
 	 */
-	private static final float BLAST_RADIUS = 10;
+	private static final float BLAST_RADIUS = 2;
 	/**
 	 * Power of the blast explosion
 	 */
@@ -64,7 +64,7 @@ public class Bomb extends GameElement {
 	/**
 	 * Precision of the timer.
 	 */
-	private static final int PRECISION_TIMER = 100;
+	private static final int PRECISION_TIMER = 1000;
 	/**
 	 * Max value of the timer.
 	 */

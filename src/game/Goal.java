@@ -82,10 +82,10 @@ public class Goal extends GameElement {
 		FixtureDef fixtureDef = new FixtureDef();
 		PolygonShape dynamicBox = new PolygonShape();
 		dynamicBox.setRadius(.2f);
-		dynamicBox.setAsBox(.4f, .4f);
+		dynamicBox.setAsBox(0, 0);
 		fixtureDef.shape = dynamicBox;
-		fixtureDef.density = 1;
-		fixtureDef.friction = 0.3f;
+		fixtureDef.density = 0;
+		fixtureDef.friction = 0f;
 		return fixtureDef;
 	}
 }

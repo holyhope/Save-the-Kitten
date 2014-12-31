@@ -216,15 +216,18 @@ public class Round {
 	 * @return True if defeat
 	 */
 	public boolean isDefeat() {
-		return bullets.stream().map(bullet -> bullet.isStopped())
-				.reduce(false, (a, b) -> a || b);
+		return bullets.stream().allMatch(Bullet::isLaunched)
+				&& bullets.stream().anyMatch(Bullet::isStopped) && !isVictory();
 	}
 
 	/**
 	 * Calculation of a new step
 	 */
 	private void update() {
-		world.step(timeStep, velocityIterations, positionIterations);
+		try {
+			world.step(timeStep, velocityIterations, positionIterations);
+		} catch (Exception e) {
+		}
 	}
 
 	/**
@@ -242,7 +245,7 @@ public class Round {
 		} while (!isVictory() && !isDefeat());
 
 		stopLaunch();
-		// bombs.stream().forEach(Bomb::stopTimer);
+
 		synchronized (endLock) {
 			endLock.notifyAll();
 		}
