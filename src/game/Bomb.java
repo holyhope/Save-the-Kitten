@@ -64,7 +64,7 @@ public class Bomb extends GameElement {
 	/**
 	 * Precision of the timer.
 	 */
-	private static final int PRECISION_TIMER = 1000;
+	private static final int PRECISION_TIMER = 200;
 	/**
 	 * Max value of the timer.
 	 */
@@ -201,6 +201,7 @@ public class Bomb extends GameElement {
 		bodyDef.position.set(position.x, position.y);
 		bodyDef.type = BodyType.STATIC;
 		bodyDef.awake = true;
+		bodyDef.active = false;
 		Body body = Objects.requireNonNull(world).createBody(bodyDef);
 		return new Bomb(body);
 	}
