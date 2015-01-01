@@ -10,6 +10,7 @@ import java.awt.geom.AffineTransform;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -560,6 +561,7 @@ public class Game {
 			InvocationTargetException, NoSuchMethodException, SecurityException {
 
 		int timer = 1;
+		LinkedHashSet<Bomb> bombsPlanted = new LinkedHashSet<>();
 		Bomb bomb = null;
 		for (;;) {
 			context.renderFrame((g, contentLost) -> {
@@ -578,15 +580,22 @@ public class Game {
 					}
 				}
 				if (bomb != null) {
+					boolean changed = false;
+					for (Bomb bombPlanted : bombsPlanted) {
+						if (Graphics.clickOnGameElement(context, event, round,
+								bombPlanted)) {
+							timer = increaseBombTimer(bombPlanted, timer);
+							bomb = bombPlanted;
+							changed = true;
+							break;
+						}
+					}
 					// Check to change timer
-					if (Graphics
-							.clickOnGameElement(context, event, round, bomb)) {
-						timer = increaseBombTimer(bomb, timer);
-					} else {
+					if (!changed) {
 						if (!round.canPlantBomb()) {
 							break;
 						}
-						bomb = plantBomb(round, event);
+						bombsPlanted.add(plantBomb(round, event));
 						timer = resetTimer(bomb);
 					}
 				} else {
@@ -594,6 +603,7 @@ public class Game {
 						break;
 					}
 					bomb = plantBomb(round, event);
+					bombsPlanted.add(bomb);
 					timer = resetTimer(bomb);
 				}
 				bomb.setTimer(timer);

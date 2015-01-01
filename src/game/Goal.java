@@ -1,5 +1,7 @@
 package game;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -41,17 +43,11 @@ public class Goal extends GameElement {
 		return "Goal " + getPosition();
 	}
 
-	/**
-	 * Draw goal on graphics
-	 */
-	/*
-	 * @Override public void draw(Graphics2D graphics) { Point position =
-	 * getGraphicPosition(); System.out.println("Position Gx : " + position.x +
-	 * " Position y : " + position.y); graphics.fillRect(position.x ,
-	 * position.y, 20, 20);
-	 * 
-	 * }
-	 */
+	@Override
+	public void draw(Graphics2D graphics) {
+		graphics.setColor(Color.BLUE);
+		super.draw(graphics);
+	}
 
 	/**
 	 * Receive a bullet.

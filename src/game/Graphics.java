@@ -166,28 +166,7 @@ public class Graphics {
 
 		graphics.translate(0, dimension.getHeight());
 
-		graphics.setColor(Color.DARK_GRAY);
-
 		round.draw(graphics);
-
-		graphics.setColor(Color.PINK);
-		for (GameElement element : round.getLaunchers()) {
-			element.draw(graphics);
-		}
-
-		graphics.setColor(Color.BLUE);
-		for (GameElement element : round.getGoals()) {
-			element.draw(graphics);
-		}
-
-		graphics.setColor(Color.BLACK);
-		for (GameElement element : round.getBullets()) {
-			element.draw(graphics);
-		}
-		graphics.setColor(Color.RED);
-		for (GameElement element : round.getBombs()) {
-			element.draw(graphics);
-		}
 
 		graphics2D.setTransform(AffineTransform.getTranslateInstance(x, y));
 		graphics2D.drawImage(image, AffineTransform.getScaleInstance(width

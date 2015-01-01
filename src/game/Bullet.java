@@ -1,5 +1,6 @@
 package game;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.lang.reflect.Method;
 import java.util.Objects;
@@ -77,6 +78,7 @@ public abstract class Bullet extends GameElement {
 	@Override
 	public void draw(Graphics2D graphics) {
 		if (isActive() || isStopped()) {
+			graphics.setColor(Color.BLACK);
 			super.draw(graphics);
 		}
 	}

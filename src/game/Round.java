@@ -154,42 +154,6 @@ public class Round {
 	}
 
 	/**
-	 * Get collections of all launcher
-	 * 
-	 * @return unmodifiable set of launchers
-	 */
-	public Set<Launcher> getLaunchers() {
-		return Collections.unmodifiableSet(launchers);
-	}
-
-	/**
-	 * Get collections of all bombs
-	 * 
-	 * @return unmodifiable set of bombs
-	 */
-	public Set<Bomb> getBombs() {
-		return Collections.unmodifiableSet(bombs);
-	}
-
-	/**
-	 * Get collections of all bullet
-	 * 
-	 * @return unmodifiable set of bullets
-	 */
-	public Set<Bullet> getBullets() {
-		return Collections.unmodifiableSet(bullets);
-	}
-
-	/**
-	 * Get collections of all goal
-	 * 
-	 * @return unmodifiable set of goals
-	 */
-	public Set<Goal> getGoals() {
-		return Collections.unmodifiableSet(goals);
-	}
-
-	/**
 	 * Check if position is in area
 	 * 
 	 * @param position
@@ -404,17 +368,31 @@ public class Round {
 	}
 
 	/**
+	 * Draw round: walls, launchers, goals, bombs then bullets.
+	 * 
+	 * @param graphics
+	 *            to draw in.
+	 */
+	public void draw(Graphics2D graphics) {
+		drawWalls(graphics);
+		launchers.stream().forEach(l -> l.draw(graphics));
+		goals.stream().forEach(g -> g.draw(graphics));
+		bombs.stream().forEach(b -> b.draw(graphics));
+		bullets.stream().forEach(b -> b.draw(graphics));
+	}
+
+	/**
 	 * Draw walls in area.
 	 * 
-	 * @param graphics2D
+	 * @param graphics
 	 *            to draw in
 	 */
-	public void draw(Graphics2D graphics2D) {
+	private void drawWalls(Graphics2D graphics) {
 		Vec2 vertices[] = new Vec2[4];
 		for (int i = 0; i < vertices.length; i++) {
 			vertices[i] = new Vec2();
 		}
-		graphics2D.setColor(WALL_COLOR);
+		graphics.setColor(WALL_COLOR);
 		Body body = world.getBodyList();
 		while (body != null) {
 			if (body.getUserData() == null) {
@@ -436,7 +414,7 @@ public class Round {
 							.reduce(Integer.MIN_VALUE, Math::max)
 							- y);
 
-					graphics2D.fillRect(x, y, width, height);
+					graphics.fillRect(x, y, width, height);
 				} catch (Throwable t) {
 					Graphics.addException(t);
 				}

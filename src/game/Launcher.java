@@ -1,5 +1,7 @@
 package game;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -11,7 +13,6 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Function;
 
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -165,7 +166,9 @@ public class Launcher extends GameElement {
 		return area;
 	}
 
-	public void addBullet(Function<?, Bullet> bullet) {
-
+	@Override
+	public void draw(Graphics2D graphics) {
+		graphics.setColor(Color.PINK);
+		super.draw(graphics);
 	}
 }
