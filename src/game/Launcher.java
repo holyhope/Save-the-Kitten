@@ -29,7 +29,7 @@ public class Launcher extends GameElement {
 	/**
 	 * Number of millisecond between two bullet
 	 */
-	private final long waitTime = 250;
+	private final long waitTime = 800;
 	/**
 	 * Orientation of the canon
 	 */
@@ -120,13 +120,20 @@ public class Launcher extends GameElement {
 		bullets.removeAll(set);
 
 		new Thread(() -> {
+			long previous = 0;
 			for (Bullet bullet : set) {
 				if (stop) {
 					return;
 				}
-				bullet.start();
+				for (;;) {
+					if (System.currentTimeMillis() - previous >= waitTime) {
+						bullet.start();
+						previous = System.currentTimeMillis();
+						break;
+					}
+				}
 				try {
-					Thread.sleep(waitTime);
+					Thread.sleep(waitTime - 100);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}

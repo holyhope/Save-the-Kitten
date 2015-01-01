@@ -77,7 +77,7 @@ public abstract class Bullet extends GameElement {
 	 */
 	@Override
 	public void draw(Graphics2D graphics) {
-		if (isActive() || isStopped()) {
+		if (isStarted()) {
 			graphics.setColor(Color.BLACK);
 			super.draw(graphics);
 		}

@@ -14,13 +14,21 @@ import org.jbox2d.dynamics.World;
  */
 public final class ParkourCat extends Bullet {
 	/**
+	 * Speed of the cat when climbing to walls.
+	 */
+	private static final Vec2 SPEED_CLIMB = new Vec2(0f, .015f);
+	/**
+	 * Speed of the cat after climbing.
+	 */
+	private static final Vec2 SPEED_JUMP = new Vec2(.015f, .015f);
+	/**
 	 * Number of wall climbed by the cat
 	 */
 	private AtomicInteger parkoured = new AtomicInteger(0);
 	/**
 	 * Number of wall that the cat is able to climb
 	 */
-	private static final int maxParkour = 1;
+	private static final int MAX_PARKOUR = 1;
 
 	/**
 	 * Create a parkourCat in world at position with some velocity
@@ -53,8 +61,8 @@ public final class ParkourCat extends Bullet {
 	public void beginContact(Body body) {
 		super.beginContact(body);
 		// TODO Test
-		if (parkoured.getAndIncrement() < maxParkour) {
-			setLinearVelocity(new Vec2(0f, .01f));
+		if (parkoured.getAndIncrement() < MAX_PARKOUR) {
+			setLinearVelocity(SPEED_CLIMB);
 		} else {
 			stop();
 		}
@@ -62,6 +70,6 @@ public final class ParkourCat extends Bullet {
 
 	@Override
 	public void endContact(Body body) {
-		setLinearVelocity(new Vec2(.01f, .01f));
+		setLinearVelocity(SPEED_JUMP);
 	}
 }
