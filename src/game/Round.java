@@ -186,7 +186,7 @@ public class Round {
 	 */
 	public boolean isDefeat() {
 		return bullets.stream().allMatch(Bullet::isStarted)
-				&& bullets.stream().anyMatch(Bullet::isStopped) && !isVictory();
+				&& bullets.stream().allMatch(Bullet::isStopped) && !isVictory();
 	}
 
 	/**
@@ -196,6 +196,16 @@ public class Round {
 		try {
 			world.step(timeStep, velocityIterations, positionIterations);
 		} catch (IndexOutOfBoundsException e) {
+		}
+		// If bullets are static, make them move.
+		for (Bullet bullet : bullets) {
+			Vec2 velocity = bullet.getLinearVelocity();
+			float minimumSpeed = bullet.getMinimumSpeed();
+			float actualSpeed = velocity.normalize();
+			if (Math.abs(actualSpeed) < minimumSpeed) {
+				Vec2 newSpeed = velocity.mul(minimumSpeed);
+				bullet.setSpeed(newSpeed);
+			}
 		}
 	}
 

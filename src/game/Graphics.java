@@ -354,23 +354,26 @@ public class Graphics {
 	 *            of the application.
 	 * @param event
 	 *            of the mouse.
-	 * @param x
+	 * @param l
 	 *            of the top left corner of the area.
-	 * @param y
+	 * @param m
 	 *            of the top left corner of the area.
-	 * @param width
+	 * @param n
 	 *            of the area.
-	 * @param height
+	 * @param o
 	 *            of the area.
 	 * @return True if user clicked in area.
 	 */
 	public static boolean click(ApplicationContext context, MotionEvent event,
-			int x, int y, int width, int height) {
+			long l, long m, long n, long o) {
+		if (event == null) {
+			return false;
+		}
 		float mouseX = event.getX();
 		float mouseY = event.getY();
 		return Action.DOWN.equals(Objects.requireNonNull(event).getAction())
-				&& x <= mouseX && mouseX < x + width && y <= mouseY
-				&& mouseY < y + height;
+				&& l <= mouseX && mouseX < l + n && m <= mouseY
+				&& mouseY < m + o;
 	}
 
 	/**

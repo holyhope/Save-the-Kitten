@@ -34,12 +34,21 @@ public abstract class GameElement {
 	}
 
 	/**
+	 * Get linear velocity of the element.
+	 * 
+	 * @return velocity
+	 */
+	public Vec2 getLinearVelocity() {
+		return new Vec2(body.getLinearVelocity());
+	}
+
+	/**
 	 * Get the real position of the element in the round
 	 * 
 	 * @return Position of the element.
 	 */
 	public Vec2 getPosition() {
-		return body.getPosition();
+		return new Vec2(body.getPosition());
 	}
 
 	/**
@@ -68,16 +77,6 @@ public abstract class GameElement {
 	}
 
 	/**
-	 * Enable or disable element.
-	 * 
-	 * @param active
-	 *            True to enable element
-	 */
-	public void setActive(boolean active) {
-		body.setActive(active);
-	}
-
-	/**
 	 * Check if element is active.
 	 * 
 	 * @return True if element is enabled.
@@ -102,18 +101,17 @@ public abstract class GameElement {
 	 * 
 	 * @return World of the element.
 	 */
-	public World getWorld() {
+	protected World getWorld() {
 		return body.getWorld();
 	}
 
 	/**
-	 * Set velocity to the element
+	 * Get the body of the element.
 	 * 
-	 * @param velocity
-	 *            to set
+	 * @return Body of the element.
 	 */
-	public void setLinearVelocity(Vec2 velocity) {
-		body.setLinearVelocity(velocity);
+	protected Body getBody() {
+		return body;
 	}
 
 	/**

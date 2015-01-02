@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.jbox2d.collision.shapes.MassData;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -51,6 +52,9 @@ public abstract class Bullet extends GameElement {
 
 	protected Bullet(Body body, FixtureDef fixtureDef) {
 		super(body);
+		MassData massData = new MassData();
+		massData.mass = 2f;
+		body.setMassData(massData);
 		body.createFixture(fixtureDef).setFilterData(filter);
 	}
 
@@ -61,6 +65,7 @@ public abstract class Bullet extends GameElement {
 		bodyDef.bullet = true;
 		bodyDef.active = false;
 		bodyDef.fixedRotation = false;
+		bodyDef.allowSleep = false;
 		Objects.requireNonNull(vec2);
 		bodyDef.position.set(vec2.x, vec2.y);
 		Objects.requireNonNull(velocity);
@@ -110,8 +115,9 @@ public abstract class Bullet extends GameElement {
 		dynamicBox.setRadius(0.1f);
 		dynamicBox.setAsBox(.00000001f, .00000001f);
 		fixtureDef.shape = dynamicBox;
-		fixtureDef.density = 1;
+		fixtureDef.density = 1f;
 		fixtureDef.friction = 0f;
+		fixtureDef.restitution = .1f;
 		return fixtureDef;
 	}
 
@@ -136,7 +142,7 @@ public abstract class Bullet extends GameElement {
 	 * Active the bullet
 	 */
 	public void start() {
-		setActive(true);
+		getBody().setActive(true);
 		started = true;
 	}
 
@@ -145,7 +151,7 @@ public abstract class Bullet extends GameElement {
 	 */
 	public void stop() {
 		stopped = true;
-		setActive(false);
+		getBody().setActive(false);
 	}
 
 	/**
@@ -173,4 +179,17 @@ public abstract class Bullet extends GameElement {
 	 *            colliding width that element.
 	 */
 	public abstract void endContact(Body body);
+
+	/**
+	 * Get minimum speed of the bullet.
+	 * 
+	 * @return minimum speed.
+	 */
+	public float getMinimumSpeed() {
+		return .001f;
+	}
+
+	public void setSpeed(Vec2 velocity) {
+		getBody().setLinearVelocity(velocity);
+	}
 }

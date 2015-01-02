@@ -62,7 +62,7 @@ public final class ParkourCat extends Bullet {
 		super.beginContact(body);
 		// TODO Test
 		if (parkoured.getAndIncrement() < MAX_PARKOUR) {
-			setLinearVelocity(SPEED_CLIMB);
+			getBody().setLinearVelocity(SPEED_CLIMB);
 		} else {
 			stop();
 		}
@@ -70,6 +70,6 @@ public final class ParkourCat extends Bullet {
 
 	@Override
 	public void endContact(Body body) {
-		setLinearVelocity(SPEED_JUMP);
+		getBody().setLinearVelocity(SPEED_JUMP);
 	}
 }

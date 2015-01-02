@@ -7,6 +7,7 @@ import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -307,6 +308,7 @@ public class Game {
 				separatorSize);
 		drawRoundSelectorCurrentPage(graphics2D, page);
 		drawRoundSelectorArrows(graphics2D, page > 0, page < getLastPage());
+		drawClose(graphics2D);
 	}
 
 	/**
@@ -425,6 +427,9 @@ public class Game {
 			}
 			try {
 				MotionEvent event = context.waitAndBlockUntilAMotion();
+				if (clickOnCLose(context, event)) {
+					context.exit(0);
+				}
 				int deltaPage = page * ROUNDS_DISPLAYED;
 				for (int i = 0; i < halfRoundDisplayed; i++) {
 					int x = Graphics.LEFT_PIXEL.get() + i * width;
@@ -567,11 +572,15 @@ public class Game {
 			context.renderFrame((g, contentLost) -> {
 				Graphics.drawBackground(g);
 				Graphics.update(g, round);
+				drawClose(g);
 			});
 			try {
 				MotionEvent event;
 				for (;;) {
 					event = context.waitAndBlockUntilAMotion();
+					if (clickOnCLose(context, event)) {
+						context.exit(0);
+					}
 					if (Graphics.click(context, event,
 							Graphics.LEFT_PIXEL.get(),
 							Graphics.TOP_PIXEL.get(), Graphics.WIDTH.get(),
@@ -595,7 +604,8 @@ public class Game {
 						if (!round.canPlantBomb()) {
 							break;
 						}
-						bombsPlanted.add(plantBomb(round, event));
+						bomb = plantBomb(round, event);
+						bombsPlanted.add(bomb);
 						timer = resetTimer(bomb);
 					}
 				} else {
@@ -629,6 +639,83 @@ public class Game {
 		context.renderFrame((g, contentLost) -> {
 			Graphics.drawBackground(g);
 		});
+	}
+
+	/**
+	 * Draw cross for close.
+	 * 
+	 * @param graphics
+	 *            to draw in.
+	 */
+	private void drawClose(Graphics2D graphics) {
+		final int barWidth = 50;
+		final int barHeight = 10;
+		final int margin = 5;
+
+		Rectangle2D bar = new Rectangle2D.Float(-barWidth / 2, -barHeight / 2,
+				barWidth, barHeight);
+
+		graphics.setTransform(AffineTransform.getTranslateInstance(
+				Graphics.LEFT_PIXEL.get() + Graphics.WIDTH.get() + margin
+						+ Math.cos(Math.PI / 4) * (barWidth / 2),
+				Graphics.TOP_PIXEL.get() + margin + Math.cos(Math.PI / 4)
+						* (barWidth / 2)));
+
+		graphics.setColor(Color.RED);
+
+		graphics.fill(AffineTransform.getRotateInstance(Math.PI / 4)
+				.createTransformedShape(bar));
+
+		graphics.fill(AffineTransform.getRotateInstance(3 * Math.PI / 4)
+				.createTransformedShape(bar));
+
+		graphics.setTransform(AffineTransform.getTranslateInstance(
+				Graphics.LEFT_PIXEL.get() + Graphics.WIDTH.get() - margin
+						- Math.cos(Math.PI / 4) * barWidth,
+				Graphics.TOP_PIXEL.get() - margin - Math.cos(Math.PI / 4)
+						* barWidth));
+
+		graphics.setColor(Color.RED);
+
+		graphics.fill(AffineTransform.getRotateInstance(Math.PI / 4)
+				.createTransformedShape(bar));
+
+		graphics.fill(AffineTransform.getRotateInstance(3 * Math.PI / 4)
+				.createTransformedShape(bar));
+	}
+
+	/**
+	 * Check if user click on close area (draw it with
+	 * Game.drawClose(Graphics2D))
+	 * 
+	 * @param context
+	 *            of the application
+	 * @param motionEvent
+	 *            - mouse event
+	 * @return
+	 */
+	private boolean clickOnCLose(ApplicationContext context,
+			MotionEvent motionEvent) {
+		final int barWidth = 50;
+		final int margin = 5;
+		return Graphics.click(
+				context,
+				motionEvent,
+				Math.round(Graphics.LEFT_PIXEL.get() + Graphics.WIDTH.get()
+						+ margin),
+				Math.round(Graphics.TOP_PIXEL.get() + margin),
+				Math.round(Math.cos(Math.PI / 4) * barWidth),
+				Math.round(Math.cos(Math.PI / 4) * barWidth))
+				|| Graphics.click(
+						context,
+						motionEvent,
+						Math.round(Graphics.LEFT_PIXEL.get()
+								+ Graphics.WIDTH.get() + margin
+								- Math.cos(Math.PI / 4) * barWidth),
+						Math.round(Graphics.TOP_PIXEL.get() + margin
+								- Math.cos(Math.PI / 4) * barWidth),
+						Math.round(Math.cos(Math.PI / 4) * barWidth),
+						Math.round(Math.cos(Math.PI / 4) * barWidth));
 	}
 
 	/**
@@ -705,8 +792,14 @@ public class Game {
 									context.renderFrame((g, contentLost) -> {
 										Graphics.drawBackground(g);
 										Graphics.update(g, round);
+										drawClose(g);
 									});
 									previous = System.currentTimeMillis();
+									MotionEvent motionEvent = context
+											.pollMotionTracker();
+									if (clickOnCLose(context, motionEvent)) {
+										context.exit(0);
+									}
 									try {
 										Thread.sleep(Graphics.REFRESH_TIME);
 									} catch (Exception e) {
@@ -717,7 +810,6 @@ public class Game {
 
 							EndRound(round, context);
 
-							System.out.println("end.");
 							try {
 								Thread.sleep(3000);
 							} catch (Exception e) {

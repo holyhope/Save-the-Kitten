@@ -67,7 +67,7 @@ public class Goal extends GameElement {
 			return false;
 		}
 		if (isFull()) {
-			setActive(false);
+			getBody().setActive(false);
 		}
 		return true;
 	}

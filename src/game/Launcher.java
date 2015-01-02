@@ -1,6 +1,7 @@
 package game;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -13,6 +14,7 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -38,6 +40,14 @@ public class Launcher extends GameElement {
 	 * List of bullets which will be launched
 	 */
 	private final ConcurrentLinkedQueue<Bullet> bullets = new ConcurrentLinkedQueue<>();
+	/**
+	 * Total amount of Bullet
+	 */
+	private AtomicInteger nbTotal = new AtomicInteger();
+	/**
+	 * Amount of Bullet launched
+	 */
+	private AtomicInteger nbLaunched = new AtomicInteger();
 	/**
 	 * True if launcher stopped
 	 */
@@ -104,9 +114,13 @@ public class Launcher extends GameElement {
 	public boolean addBullet(Class<? extends Bullet> classValue)
 			throws IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException, NoSuchMethodException, SecurityException {
-		return bullets.add((Bullet) Bullet.getConstructor(classValue).invoke(
-				null, getWorld(), getPosition(), orientation,
-				randomAngle.nextFloat()));
+		if (bullets.add((Bullet) Bullet.getConstructor(classValue)
+				.invoke(null, getWorld(), getPosition(), orientation,
+						randomAngle.nextFloat()))) {
+			nbTotal.incrementAndGet();
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -128,6 +142,7 @@ public class Launcher extends GameElement {
 				for (;;) {
 					if (System.currentTimeMillis() - previous >= waitTime) {
 						bullet.start();
+						nbLaunched.incrementAndGet();
 						previous = System.currentTimeMillis();
 						break;
 					}
@@ -177,5 +192,11 @@ public class Launcher extends GameElement {
 	public void draw(Graphics2D graphics) {
 		graphics.setColor(Color.PINK);
 		super.draw(graphics);
+		Point position = getGraphicPosition();
+		int radiusY = Math.abs(Graphics.gameToGraphicY(getRadius()));
+		graphics.setColor(Color.BLACK);
+		graphics.setFont(new Font("Arial", Font.BOLD, 16));
+		graphics.drawString("" + (nbTotal.get() - nbLaunched.get()),
+				position.x, position.y + radiusY - 1);
 	}
 }

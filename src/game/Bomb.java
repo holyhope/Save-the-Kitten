@@ -7,11 +7,12 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.lang.reflect.Method;
 import java.util.ArrayDeque;
+import java.util.Iterator;
 import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import javax.swing.Timer;
 
 import org.jbox2d.callbacks.QueryCallback;
 import org.jbox2d.collision.AABB;
@@ -30,20 +31,40 @@ import org.jbox2d.dynamics.World;
  * @author PICHOU Maxime
  */
 public class Bomb extends GameElement {
-	private static class MyQueryCallback implements QueryCallback {
-		public ArrayDeque<Body> foundBodies = new ArrayDeque<Body>();
+	/**
+	 * 
+	 * @author pierre
+	 *
+	 */
+	private static class MyQueryCallback implements QueryCallback,
+			Iterable<Body> {
+		private final ArrayDeque<Body> foundBodies = new ArrayDeque<Body>();
 
 		@Override
 		public boolean reportFixture(Fixture fixture) {
 			foundBodies.addLast(fixture.getBody());
 			return true;// keep going to find all fixtures in the query area
 		}
+
+		@Override
+		public Iterator<Body> iterator() {
+			return foundBodies.iterator();
+		}
 	};
 
 	/**
 	 * Timer of the bomb.
 	 */
-	private final Timer timer = new Timer(getTimerPrecision(), e -> explode());
+	private long delay = 0;
+	/**
+	 * Timer of the bomb.
+	 */
+	private final TimerTask timerTask = new TimerTask() {
+		@Override
+		public void run() {
+			explode();
+		}
+	};
 	/**
 	 * Timer lock use by setTimer and startTimer.
 	 */
@@ -52,12 +73,10 @@ public class Bomb extends GameElement {
 	 * Check if bomb's timer has started.
 	 */
 	private AtomicBoolean started = new AtomicBoolean(false);
-
 	/**
 	 * Check if Bomb has already exploded
 	 */
 	private AtomicBoolean hasExplosed = new AtomicBoolean(false);
-
 	/**
 	 * Radius of the blast explosion
 	 */
@@ -65,7 +84,7 @@ public class Bomb extends GameElement {
 	/**
 	 * Power of the blast explosion
 	 */
-	private static final float BLAST_POWER = .00000002f;
+	private static final float BLAST_POWER = 0.005f;
 	/**
 	 * Precision of the timer.
 	 */
@@ -94,16 +113,11 @@ public class Bomb extends GameElement {
 		}
 		timer = Math.round(timer / getTimerPrecision()) * getTimerPrecision();
 		timerLock.writeLock().lock();
-		try {
-			if (started.get()) {
-				throw new IllegalStateException("Bomb's timer already started.");
-			}
-
-			this.timer.setInitialDelay(timer);
-			this.timer.setDelay(this.timer.getInitialDelay());
-		} finally {
-			timerLock.writeLock().unlock();
+		if (started.get()) {
+			throw new IllegalStateException("Bomb's timer already started.");
 		}
+		delay = timer;
+		timerLock.writeLock().unlock();
 	}
 
 	/**
@@ -117,7 +131,7 @@ public class Bomb extends GameElement {
 		if (started.getAndSet(true)) {
 			throw new IllegalStateException("Bomb's timer already started.");
 		}
-		timer.start();
+		new Timer().schedule(timerTask, delay);
 		timerLock.readLock().unlock();
 	}
 
@@ -166,8 +180,9 @@ public class Bomb extends GameElement {
 			return;
 		}
 		float impulseMag = blastPower / (distance * distance);
-		impulseMag = Math.min(impulseMag, 500f);
-		body.applyLinearImpulse(blastDir.mul(impulseMag), applyPoint);
+		Vec2 impulse = blastDir.mul(impulseMag);
+		System.out.println(impulse);
+		body.applyLinearImpulse(impulse, applyPoint);
 	}
 
 	/**
@@ -177,7 +192,6 @@ public class Bomb extends GameElement {
 	 *             Must be called only once.
 	 */
 	protected void explode() {
-		timer.stop();
 		if (hasExplosed.getAndSet(true)) {
 			throw new IllegalStateException("Bomb has already exploded");
 		}
@@ -187,12 +201,14 @@ public class Bomb extends GameElement {
 		MyQueryCallback queryCallback = new MyQueryCallback();
 		Vec2 vec = new Vec2(BLAST_RADIUS, BLAST_RADIUS);
 		AABB aabb = new AABB(center.sub(vec), center.add(vec));
-		getWorld().queryAABB(queryCallback, aabb);
+		try {
+			getWorld().queryAABB(queryCallback, aabb);
+		} catch (ArrayIndexOutOfBoundsException e) {
+		}
 
 		// check which of these have their center of mass within the blast
 		// radius
-		for (int i = 0; i < queryCallback.foundBodies.size(); i++) {
-			Body body = queryCallback.foundBodies.pollFirst();
+		for (Body body : queryCallback) {
 			Vec2 bodyCom = body.getWorldCenter();
 
 			if (bodyCom.sub(center).length() >= BLAST_RADIUS) {
@@ -232,10 +248,21 @@ public class Bomb extends GameElement {
 		}
 		Color color = graphics.getColor();
 		Font font = graphics.getFont();
-		float delay = this.timer.getDelay();
-		int InitialTimer = timer.getInitialDelay();
-		graphics.setColor(new Color((InitialTimer - Math.round(delay)) * 255
-				/ InitialTimer, Math.round(delay) * 255 / InitialTimer, 100));
+		long initialDelay = delay;
+		float delay;
+		if (!started.get()) {
+			delay = initialDelay;
+		} else {
+			delay = timerTask.scheduledExecutionTime()
+					- System.currentTimeMillis();
+		}
+		if (delay < 0) {
+			graphics.setColor(Color.BLACK);
+		} else {
+			graphics.setColor(new Color(Math
+					.round(((initialDelay - delay) * 255) / initialDelay), Math
+					.round((delay * 255) / initialDelay), 100));
+		}
 		super.draw(graphics);
 		Point position = getGraphicPosition();
 		FontMetrics fontMetrics = graphics.getFontMetrics();
